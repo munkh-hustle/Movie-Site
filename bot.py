@@ -306,88 +306,6 @@ async def user_limits(update: Update, context: CallbackContext) -> None:
         
         await update.message.reply_text('\n'.join(message))
 
-async def edit_description(update: Update, context: CallbackContext) -> None:
-    """Edit video description (admin only)"""
-    if not is_admin(update):
-        await update.message.reply_text("Зөвхөн админ.")
-        return
-    
-    if len(context.args) < 2:
-        await update.message.reply_text("Usage: /editdescription <video_name> <new_description>")
-        return
-    
-    video_name = ' '.join(context.args[:-1])
-    new_description = context.args[-1]
-    
-    try:
-        # Load current video data
-        with open('video_data.json', 'r', encoding='utf-8') as f:
-            video_data = json.load(f)
-        
-        if video_name in video_data:
-            # Update description
-            video_data[video_name]['description'] = new_description
-            
-            # Save back to file
-            with open('video_data.json', 'w', encoding='utf-8') as f:
-                json.dump(video_data, f, indent=2)
-            
-            await update.message.reply_text(f"✅ Description updated for '{video_name}'")
-        else:
-            await update.message.reply_text(f"❌ Video '{video_name}' not found.")
-            
-    except Exception as e:
-        logger.error(f"Error editing description: {e}")
-        await update.message.reply_text("❌ Error updating description. Check logs for details.")
-
-async def edit_title(update: Update, context: CallbackContext) -> None:
-    """Edit video title (admin only)"""
-    if not is_admin(update):
-        await update.message.reply_text("Зөвхөн админ.")
-        return
-    
-    if len(context.args) < 2:
-        await update.message.reply_text("Usage: /edittitle <video_name> <new_title>")
-        return
-    
-    video_name = ' '.join(context.args[:-1])
-    new_title = context.args[-1]
-    
-    try:
-        # Load current video data
-        with open('video_data.json', 'r', encoding='utf-8') as f:
-            video_data = json.load(f)
-        
-        if video_name in video_data:
-            # Update title
-            video_data[video_name]['title'] = new_title
-            
-            # Save back to file
-            with open('video_data.json', 'w', encoding='utf-8') as f:
-                json.dump(video_data, f, indent=2)
-            
-            await update.message.reply_text(f"✅ Title updated for '{video_name}'")
-        else:
-            await update.message.reply_text(f"❌ Video '{video_name}' not found.")
-            
-    except Exception as e:
-        logger.error(f"Error editing title: {e}")
-        await update.message.reply_text("❌ Error updating title. Check logs for details.")
-
-async def reload_data(update: Update, context: CallbackContext) -> None:
-    """Reload video data from disk (admin only)"""
-    if not is_admin(update):
-        await update.message.reply_text("Зөвхөн админ.")
-        return
-    
-    try:
-        load_video_db()
-        sync_video_data()
-        await update.message.reply_text("Video data reloaded successfully!")
-    except Exception as e:
-        logger.error(f"Error reloading data: {e}")
-        await update.message.reply_text("Error reloading data.")
-
 async def notify_admin_payment_submission(context: CallbackContext, user, file_path):
     """Notify admin about new payment submission"""
     keyboard = [
@@ -696,10 +614,6 @@ async def blocked_users(update: Update, context: CallbackContext) -> None:
         '\n'.join(message),
         reply_markup=reply_markup
     )
-
-async def help_command(update: Update, context: CallbackContext) -> None:
-    """Send a message when the command /help is issued."""
-    await update.message.reply_text('Тусламж!')
 
 def is_admin(update: Update):
     """Check if user is admin"""
@@ -1230,7 +1144,6 @@ def main() -> None:
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler("sync", sync))  # Add this line
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("addvideo", addvideo))
     application.add_handler(CommandHandler("rename", rename))
     application.add_handler(CommandHandler("delete", delete))
@@ -1241,13 +1154,8 @@ def main() -> None:
     application.add_handler(CommandHandler("resetuser", reset_user))
     application.add_handler(CommandHandler("videologs", video_logs))
     application.add_handler(CommandHandler("verifypayment", verify_payment))
-    application.add_handler(CommandHandler("reload", reload_data))
-    application.add_handler(CommandHandler("editdescription", edit_description))
-    application.add_handler(CommandHandler("edittitle", edit_title))
     application.add_handler(CommandHandler("userlimit", user_limits))
 
-
-    
     # Handle button presses
     application.add_handler(CallbackQueryHandler(button))
     
