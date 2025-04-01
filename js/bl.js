@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const searchTerm = searchInput.value.toLowerCase();
         if (searchTerm) {
             filteredMovies = getMoviesByCategory('bl').filter(movie => 
-                movie.title.toLowerCase().includes(searchTerm) ||
+                (movie.title_name || movie.title).toLowerCase().includes(searchTerm) ||
                 movie.description.toLowerCase().includes(searchTerm)
             );
         } else {
@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentPage = 1;
         displayMovies(filteredMovies, currentPage);
     }
+    
     
     searchBtn.addEventListener('click', handleSearch);
     searchInput.addEventListener('keypress', (e) => {

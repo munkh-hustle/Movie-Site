@@ -34,9 +34,9 @@ function createMovieCard(movie) {
     return `
         <div class="movie-card">
             <a href="movie.html?title=${encodeURIComponent(movie.title)}">
-                <img src="${movie.poster}" alt="${movie.title}">
+                <img src="${movie.poster}" alt="${movie.title_name || movie.title}">
                 <div class="movie-info">
-                    <h3>${movie.title}</h3>
+                    <h3>${movie.title_name || movie.title}</h3>
                     <div class="movie-meta">
                         <span>${movie.year}</span>
                         <span>${movie.rating} <i class="fas fa-star"></i></span>
@@ -46,6 +46,7 @@ function createMovieCard(movie) {
         </div>
     `;
 }
+
 
 // Get URL parameter
 function getUrlParameter(name) {

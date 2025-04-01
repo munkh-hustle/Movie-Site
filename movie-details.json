@@ -1,7 +1,7 @@
 {
     "secret-relationship-1-1": {
       "title": "secret-relationship-1-1",
-      "title_name": "",
+      "title_name": "Secret Relationship S1 E1",
       "year": 2023,
       "genre": "BL, Romance",
       "duration": "90 min",
@@ -16,6 +16,7 @@
     },
     "secret-relationship-1-2": {
       "title": "secret-relationship-1-2",
+      "title_name": "Secret Relationship S1 E2",
       "year": 2023,
       "genre": "BL, Romance",
       "duration": "92 min",
@@ -30,6 +31,7 @@
     },
     "brokeback-mountain-2005": {
       "title": "brokeback-mountain-2005",
+      "title_name": "Brokeback Mountain 2005",
       "year": 2005,
       "genre": "Drama, LGBT",
       "duration": "134 min",
@@ -44,6 +46,7 @@
     },
     "red-white-and-royal-blue-2023": {
       "title": "red-white-and-royal-blue-2023",
+      "title_name": "Red White And Royal Blue 2023",
       "year": 2023,
       "genre": "Romance, LGBT",
       "duration": "118 min",
@@ -58,6 +61,7 @@
     },
     "bros-2022": {
       "title": "bros-2022",
+      "title_name": "Bros 2022",
       "year": 2022,
       "genre": "Comedy, LGBT",
       "duration": "115 min",
@@ -72,6 +76,7 @@
     },
     "queer-as-folk-1-1": {
       "title": "queer-as-folk-1-1",
+      "title_name": "Querr as folk S1 E1",
       "year": 2022,
       "genre": "Drama, LGBT",
       "duration": "60 min",

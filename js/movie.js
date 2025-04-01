@@ -9,10 +9,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const movie = movieData[movieTitle];
     
-    // Set movie details
-    document.getElementById('movie-title').textContent = movie.title;
+    // Set movie details - using title_name for display
+    document.getElementById('movie-title').textContent = movie.title_name || movie.title;
     document.getElementById('movie-poster').src = movie.poster;
-    document.getElementById('movie-poster').alt = movie.title;
+    document.getElementById('movie-poster').alt = movie.title_name || movie.title;
     document.getElementById('movie-year').textContent = movie.year;
     document.getElementById('movie-duration').textContent = movie.duration;
     document.getElementById('movie-rating').textContent = `${movie.rating} ★`;
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         `<span>${genre}</span>`
     ).join('');
     
-    // Set Telegram link
+    // Set Telegram link (still using title for the backend)
     const telegramLink = document.getElementById('telegram-link');
     telegramLink.href = `https://t.me/lgbt_kino_bot?start=video_${encodeURIComponent(movie.title)}`;
 });
