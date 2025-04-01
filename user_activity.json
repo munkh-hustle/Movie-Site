@@ -1,0 +1,48 @@
+{
+  "7942816218": {
+    "username": "muunu03",
+    "first_name": "Solongos",
+    "last_name": "Khel",
+    "videos": [],
+    "chat_log": [
+      {
+        "timestamp": "2025-04-02T00:45:47.229392",
+        "text": "Hi",
+        "chat_type": "private"
+      },
+      {
+        "timestamp": "2025-04-02T00:45:51.601106",
+        "text": "Ssup",
+        "chat_type": "private"
+      }
+    ],
+    "photo_logs": [],
+    "video_delivery_log": [
+      {
+        "timestamp": "2025-04-02T00:45:05.449699",
+        "video_name": "secret-relationship-1-1",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-02T00:45:27.570055",
+        "video_name": "bros-2022",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-02T00:46:07.299137",
+        "video_name": "bros-2022",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-02T00:47:06.791334",
+        "video_name": "bros-2022",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-02T00:48:32.915397",
+        "video_name": "bros-2022",
+        "status": "sent"
+      }
+    ]
+  }
+}
