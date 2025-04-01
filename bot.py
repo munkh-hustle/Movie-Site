@@ -26,12 +26,12 @@ logger = logging.getLogger(__name__)
 ADMIN_ID = 7905267896
 
 # User activity log file
-USER_ACTIVITY_FILE = 'user_activity.json'
+USER_ACTIVITY_FILE = 'db/user_activity.json'
 
-BLOCKED_USERS_FILE = 'blocked_users.json'
+BLOCKED_USERS_FILE = 'db/blocked_users.json'
 MAX_VIDEOS_BEFORE_BLOCK = 5
 
-USER_LIMITS_FILE = 'user_limits.json'
+USER_LIMITS_FILE = 'db/user_limits.json'
 
 # Dictionary to store video IDs and names
 video_db = {}
@@ -142,7 +142,7 @@ def record_user_activity(user_id, username, first_name, last_name, video_name):
             'video_delivery_log': []
         }
     
-    # Keep the videos array for backward compatibility - for unique video
+    # Keep the videos array for backward compatibility
     activity_data[user_id_str]['videos'].append({
         'video_name': video_name,
         'timestamp': datetime.now().isoformat()
@@ -257,7 +257,7 @@ def log_sent_video(user_id, video_name):
 def update_payment_status(user_id, status):
     """Update payment status in the database"""
     try:
-        with open('payment_submissions.json', 'r+', encoding='utf-8') as f:
+        with open('db/payment_submissions.json', 'r+', encoding='utf-8') as f:
             data = json.load(f)
             
         # Find most recent submission from this user
@@ -267,7 +267,7 @@ def update_payment_status(user_id, status):
                 submission['processed_at'] = datetime.now().isoformat()
                 break
                 
-        with open('payment_submissions.json', 'w', encoding='utf-8') as f:
+        with open('db/payment_submissions.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2)
             
     except Exception as e:
@@ -276,7 +276,7 @@ def update_payment_status(user_id, status):
 def save_payment_submission(payment_data):
     """Save payment submission to JSON file"""
     try:
-        with open('payment_submissions.json', 'r+', encoding='utf-8') as f:
+        with open('db/payment_submissions.json', 'r+', encoding='utf-8') as f:
             try:
                 data = json.load(f)
             except json.JSONDecodeError:
@@ -286,7 +286,7 @@ def save_payment_submission(payment_data):
     
     data.append(payment_data)
     
-    with open('payment_submissions.json', 'w', encoding='utf-8') as f:
+    with open('db/payment_submissions.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
 
 async def update_metadata(update: Update, context: CallbackContext) -> None:
