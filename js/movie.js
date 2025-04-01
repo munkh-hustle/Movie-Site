@@ -29,5 +29,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Set Telegram link
     const telegramLink = document.getElementById('telegram-link');
-    telegramLink.href = `https://t.me/lgbt_bot?start=video_${encodeURIComponent(movie.title)}`;
+    telegramLink.href = `https://t.me/lgbt_kino_bot?start=video_${encodeURIComponent(movie.title)}`;
 });
