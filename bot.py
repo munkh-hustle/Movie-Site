@@ -26,28 +26,32 @@ logger = logging.getLogger(__name__)
 ADMIN_ID = 7905267896
 
 # User activity log file
-USER_ACTIVITY_FILE = 'user_activity.json'
+USER_ACTIVITY_FILE = '.db/user_activity.json'
 
-BLOCKED_USERS_FILE = 'blocked_users.json'
+BLOCKED_USERS_FILE = '.db/blocked_users.json'
 MAX_VIDEOS_BEFORE_BLOCK = 5
 
-USER_LIMITS_FILE = 'user_limits.json'
+USER_LIMITS_FILE = '.db/user_limits.json'
 
 # Dictionary to store video IDs and names
 video_db = {}
 def load_video_db():
-    """Load video database from JSON file"""
+    """Load video database from movie-details.json file"""
     global video_db
     try:
-        with open('video_db.json', 'r', encoding='utf-8') as f:
-            video_db = json.load(f)
+        with open('movie-details.json', 'r', encoding='utf-8') as f:
+            video_data = json.load(f)
+            # Create a simplified mapping of title to file_id for backward compatibility
+            video_db = {title: data['file_id'] for title, data in video_data.items()}
     except (FileNotFoundError, json.JSONDecodeError):
         video_db = {}
+        # Initialize with empty movie-details.json if it doesn't exist
+        with open('movie-details.json', 'w', encoding='utf-8') as f:
+            json.dump({}, f, indent=2)
 
 def save_video_db():
-    """Save video database to JSON file"""
-    with open('video_db.json', 'w', encoding='utf-8') as f:
-        json.dump(video_db, f, indent=2)
+    """This function is kept for backward compatibility but won't do anything"""
+    pass
 
 load_video_db()
 
@@ -130,78 +134,81 @@ def record_user_activity(user_id, username, first_name, last_name, video_name):
     if user_id_str not in activity_data:
         activity_data[user_id_str] = {
             'username': username,
-            'username': username,
             'first_name': first_name,
             'last_name': last_name,
-            'videos': []
+            'videos': [],
+            'chat_log': [],
+            'photo_logs': [],
+            'video_delivery_log': []
         }
     
+    # Keep the videos array for backward compatibility - for unique video
     activity_data[user_id_str]['videos'].append({
         'video_name': video_name,
         'timestamp': datetime.now().isoformat()
     })
     
+    # Also log in video_delivery_log
+    activity_data[user_id_str]['video_delivery_log'].append({
+        'video_name': video_name,
+        'timestamp': datetime.now().isoformat(),
+        'status': 'sent'
+    })
+    
     save_user_activity(activity_data)
 
 def load_video_data():
-    """Load video metadata from JSON file"""
+    """Load video metadata from movie-details.json file"""
     try:
-        with open('video_data.json', 'r', encoding='utf-8') as f:
+        with open('movie-details.json', 'r', encoding='utf-8') as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError) as e:
-        logger.error(f"Error loading video_data.json: {e}")
+        logger.error(f"Error loading movie-details.json: {e}")
         return {}
+    
+def save_video_data(video_data):
+    """Save video metadata to movie-details.json file"""
+    with open('movie-details.json', 'w', encoding='utf-8') as f:
+        json.dump(video_data, f, indent=2)
+
 def sync_video_data():
     """
-    Synchronize video_db.json with video_data.json:
-    - Adds any missing videos from video_data.json
-    - Removes videos that no longer exist in video_data.json
-    - Preserves existing file_ids
+    This function is simplified since we're only using one file now
+    Just ensures the video_db mapping is up to date
     """
     try:
         video_data = load_video_data()
-        changes_made = False
-        
-        # Add new videos from video_data.json
-        for name, data in video_data.items():
-            if name not in video_db and 'file_id' in data:
-                video_db[name] = data['file_id']
-                logger.info(f"Added new video: {name}")
-                changes_made = True
-        
-        # Remove videos that don't exist in video_data.json
-        for name in list(video_db.keys()):
-            if name not in video_data:
-                del video_db[name]
-                logger.info(f"Removed video: {name}")
-                changes_made = True
-        
-        if changes_made:
-            save_video_db()
-            logger.info("Video database synchronized with video_data.json")
-        return changes_made
+        # Update video_db with current file_ids
+        global video_db
+        video_db = {title: data['file_id'] for title, data in video_data.items()}
+        return True
     except Exception as e:
         logger.error(f"Error syncing video data: {e}")
         return False
 
 def log_user_message(user_id, username, first_name, text, chat_type):
-    """Save user messages to a separate log file"""
-    log_entry = {
-        'timestamp': datetime.now().isoformat(),
-        'user_id': user_id,
-        'username': username,
-        'first_name': first_name,
-        'chat_type': chat_type,
-        'text': text
-    }
+    """Save user messages to user_activity.json"""
+    activity_data = load_user_activity()
+    user_id_str = str(user_id)
     
-    try:
-        os.makedirs('logs', exist_ok=True)
-        with open('logs/message_logs.json', 'a', encoding='utf-8') as f:
-            f.write(json.dumps(log_entry))  # No comma here
-            f.write('\n')  # Ensure each entry is on a new line
-    except Exception as e:
-        logger.error(f"Failed to log message: {e}")
+    if user_id_str not in activity_data:
+        activity_data[user_id_str] = {
+            'username': username,
+            'first_name': first_name,
+            'last_name': '',
+            'videos': [],
+            'chat_log': [],
+            'photo_logs': []
+        }
+    
+    # Add message to chat log
+    activity_data[user_id_str].setdefault('chat_log', []).append({
+        'timestamp': datetime.now().isoformat(),
+        'text': text,
+        'chat_type': chat_type
+    })
+    
+    save_user_activity(activity_data)
 
 def reset_user_video_count(user_id):
     """Reset a user's video count"""
@@ -224,26 +231,33 @@ def unblock_user(user_id):
     return False
 
 def log_sent_video(user_id, video_name):
-    """Log successfully sent videos with timestamp"""
-    log_entry = {
+    """Log successfully sent videos in user_activity.json"""
+    activity_data = load_user_activity()
+    user_id_str = str(user_id)
+    
+    if user_id_str not in activity_data:
+        activity_data[user_id_str] = {
+            'username': '',
+            'first_name': '',
+            'last_name': '',
+            'videos': [],
+            'chat_log': [],
+            'photo_logs': []
+        }
+    
+    # Add video delivery log
+    activity_data[user_id_str].setdefault('video_delivery_log', []).append({
         'timestamp': datetime.now().isoformat(),
-        'user_id': user_id,
         'video_name': video_name,
         'status': 'sent'
-    }
+    })
     
-    try:
-        os.makedirs('logs', exist_ok=True)
-        with open('logs/video_delivery_log.json', 'a', encoding='utf-8') as f:
-            f.write(json.dumps(log_entry))
-            f.write('\n')
-    except Exception as e:
-        logger.error(f"Failed to log video delivery: {e}")
+    save_user_activity(activity_data)
 
 def update_payment_status(user_id, status):
     """Update payment status in the database"""
     try:
-        with open('payment_submissions.json', 'r+', encoding='utf-8') as f:
+        with open('.db/payment_submissions.json', 'r+', encoding='utf-8') as f:
             data = json.load(f)
             
         # Find most recent submission from this user
@@ -253,7 +267,7 @@ def update_payment_status(user_id, status):
                 submission['processed_at'] = datetime.now().isoformat()
                 break
                 
-        with open('payment_submissions.json', 'w', encoding='utf-8') as f:
+        with open('.db/payment_submissions.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2)
             
     except Exception as e:
@@ -262,7 +276,7 @@ def update_payment_status(user_id, status):
 def save_payment_submission(payment_data):
     """Save payment submission to JSON file"""
     try:
-        with open('payment_submissions.json', 'r+', encoding='utf-8') as f:
+        with open('.db/payment_submissions.json', 'r+', encoding='utf-8') as f:
             try:
                 data = json.load(f)
             except json.JSONDecodeError:
@@ -272,8 +286,68 @@ def save_payment_submission(payment_data):
     
     data.append(payment_data)
     
-    with open('payment_submissions.json', 'w', encoding='utf-8') as f:
+    with open('.db/payment_submissions.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
+
+async def update_metadata(update: Update, context: CallbackContext) -> None:
+    """Update video metadata (admin only)"""
+    if not is_admin(update):
+        await update.message.reply_text("Зөвхөн админ.")
+        return
+    
+    if len(context.args) < 3:
+        await update.message.reply_text(
+            "Usage: /updatemeta <video_name> <field> <value>\n\n"
+            "Example: /updatemeta brokeback-mountain-2005 description \"A story about...\"\n"
+            "Available fields: title_name, year, genre, duration, rating, description, "
+            "director, cast, release, poster, category"
+        )
+        return
+    
+    video_name = context.args[0]
+    field = context.args[1].lower()
+    value = ' '.join(context.args[2:])
+    
+    # Load video data
+    video_data = load_video_data()
+    
+    if video_name not in video_data:
+        await update.message.reply_text(f"Video '{video_name}' not found.")
+        return
+    
+    # Validate field
+    valid_fields = {
+        'title_name', 'year', 'genre', 'duration', 'rating', 
+        'description', 'director', 'cast', 'release', 'poster', 'category'
+    }
+    
+    if field not in valid_fields:
+        await update.message.reply_text(
+            f"Invalid field '{field}'. Valid fields are: {', '.join(valid_fields)}"
+        )
+        return
+    
+    # Special handling for numeric fields
+    if field == 'year':
+        try:
+            value = int(value)
+        except ValueError:
+            await update.message.reply_text("Year must be a number.")
+            return
+    elif field == 'rating':
+        try:
+            value = float(value)
+        except ValueError:
+            await update.message.reply_text("Rating must be a number.")
+            return
+    
+    # Update the field
+    video_data[video_name][field] = value
+    save_video_data(video_data)
+    
+    await update.message.reply_text(
+        f"✅ Updated {field} for '{video_name}':\n\n{value}"
+    )
 
 async def user_limits(update: Update, context: CallbackContext) -> None:
     """View or set user limits (admin only)"""
@@ -633,23 +707,40 @@ async def addvideo(update: Update, context: CallbackContext) -> None:
         video_name = ' '.join(context.args)
         video_file_id = update.message.reply_to_message.video.file_id
         
-        video_db[video_name] = video_file_id
-        save_video_db()
-
-        # Update video_data.json if this is a new video
+        # Load existing data
         video_data = load_video_data()
+
+        # Create or update the video entry
         if video_name not in video_data:
             video_data[video_name] = {
                 "title": video_name,
+                "title_name": video_name,  # Default title_name same as title
+                "year": datetime.now().year,
+                "genre": "Unknown",
+                "duration": "Unknown",
+                "rating": 0.0,
                 "description": "No description available",
+                "director": "Unknown",
+                "cast": "Unknown",
+                "release": datetime.now().strftime('%B %Y'),
+                "poster": "",
+                "category": "other",
                 "file_id": video_file_id
             }
-            with open('video_data.json', 'w') as f:
-                json.dump(video_data, f, indent=2)
+        else:
+            # Just update the file_id if video exists
+            video_data[video_name]['file_id'] = video_file_id
+
+        # Save the updated data
+        save_video_data(video_data)
+        
+        # Update the video_db mapping
+        video_db[video_name] = video_file_id
 
         await update.message.reply_text(f"Video '{video_name}' added successfully!")
     else:
         await update.message.reply_text("Please reply to a video message with this command.")
+
 async def sync(update: Update, context: CallbackContext) -> None:
     """Manually sync video data (admin only)"""
     if not is_admin(update):
@@ -662,40 +753,36 @@ async def sync(update: Update, context: CallbackContext) -> None:
         await update.message.reply_text("No changes needed - databases are already in sync.")
 
 async def video_logs(update: Update, context: CallbackContext) -> None:
-    """Show video delivery logs (admin only)"""
+    """Show video delivery logs (admin only) from user_activity.json"""
     if not is_admin(update):
         await update.message.reply_text("Зөвхөн админ.")
         return
     
-    try:
-        if not os.path.exists('logs/video_delivery_log.json'):
-            await update.message.reply_text("No video logs available yet.")
-            return
+    activity_data = load_user_activity()
+    
+    # Collect all video delivery logs
+    video_counts = {}
+    total_sends = 0
+    
+    for user_id, data in activity_data.items():
+        if 'video_delivery_log' in data:
+            for log in data['video_delivery_log']:
+                video_name = log['video_name']
+                video_counts[video_name] = video_counts.get(video_name, 0) + 1
+                total_sends += 1
+    
+    if not video_counts:
+        await update.message.reply_text("No video delivery logs found.")
+        return
         
-        with open('logs/video_delivery_log.json', 'r', encoding='utf-8') as f:
-            logs = [json.loads(line) for line in f if line.strip()]
-            
-        if not logs:
-            await update.message.reply_text("No video delivery logs found.")
-            return
-            
-        # Count unique videos sent
-        video_counts = {}
-        for log in logs:
-            video_counts[log['video_name']] = video_counts.get(log['video_name'], 0) + 1
-            
-        message = ["📊 Video Delivery Statistics:"]
-        message.append(f"\nTotal videos sent: {len(logs)}")
-        message.append("\nUnique videos sent:")
+    message = ["📊 Video Delivery Statistics:"]
+    message.append(f"\nTotal videos sent: {total_sends}")
+    message.append("\nUnique videos sent:")
+    
+    for video, count in sorted(video_counts.items(), key=lambda x: x[1], reverse=True):
+        message.append(f"{video}: {count}")
         
-        for video, count in sorted(video_counts.items(), key=lambda x: x[1], reverse=True):
-            message.append(f"{video}: {count}")
-            
-        await update.message.reply_text('\n'.join(message))
-        
-    except Exception as e:
-        logger.error(f"Error reading video logs: {e}")
-        await update.message.reply_text("Error reading video logs.")
+    await update.message.reply_text('\n'.join(message))
 
 async def rename(update: Update, context: CallbackContext) -> None:
     """Rename video in database (admin only)"""
@@ -709,22 +796,21 @@ async def rename(update: Update, context: CallbackContext) -> None:
     
     old_name = ' '.join(context.args[:-1])
     new_name = context.args[-1]
+
+    # Load video data
+    video_data = load_video_data()
     
-    if old_name in video_db:
+    if old_name in video_data:
+        # Update video_data
+        video_data[new_name] = video_data.pop(old_name)
+        # Update title if it matches old name
+        if video_data[new_name]['title'] == old_name:
+            video_data[new_name]['title'] = new_name
+        save_video_data(video_data)
+        
         # Update video_db
         video_db[new_name] = video_db.pop(old_name)
-        save_video_db()  # Save to JSON file
-
-        # Update video_data
-        video_data = load_video_data()
-        if old_name in video_data:
-            video_data[new_name] = video_data.pop(old_name)
-            # Ensure title matches new name if it matched old name
-            if video_data[new_name]['title'] == old_name:
-                video_data[new_name]['title'] = new_name
-            with open('video_data.json', 'w') as f:
-                json.dump(video_data, f, indent=2)
-
+        
         # Update user activity logs
         activity_data = load_user_activity()
         for user_data in activity_data.values():
@@ -749,33 +835,57 @@ async def delete(update: Update, context: CallbackContext) -> None:
     
     video_name = ' '.join(context.args)
     
-    if video_name in video_db:
-        del video_db[video_name]
-        save_video_db()  # Save to JSON file
-
-        video_data = load_video_data()
-        if video_name in video_data:
-            del video_data[video_name]
-            with open('video_data.json', 'w') as f:
-                json.dump(video_data, f, indent=2)
-
+    # Load video data
+    video_data = load_video_data()
+    
+    if video_name in video_data:
+        # Remove from video_data
+        del video_data[video_name]
+        save_video_data(video_data)
+        
+        # Remove from video_db
+        if video_name in video_db:
+            del video_db[video_name]
+        
         await update.message.reply_text(f"Video '{video_name}' deleted successfully!")
     else:
         await update.message.reply_text(f"Video '{video_name}' not found.")
 
 async def list_videos(update: Update, context: CallbackContext) -> None:
-    """List all available videos"""
+    """List all available videos with details"""
     if not is_admin(update):
         await update.message.reply_text("Зөвхөн админ")
         return
     
-    if not video_db:
+    video_data = load_video_data()
+    if not video_data:
         await update.message.reply_text("Кино одсонгүй.")
         return
     
+    # Group by category if requested
+    if context.args and context.args[0] == 'bycategory':
+        categories = {}
+        for name, data in video_data.items():
+            category = data.get('category', 'other')
+            if category not in categories:
+                categories[category] = []
+            categories[category].append(name)
+        
+        message = ["📺 Videos by Category:"]
+        for category, videos in categories.items():
+            message.append(f"\n\n🎬 {category.upper()}:")
+            for video in sorted(videos):
+                message.append(f"- {video}")
+        
+        await update.message.reply_text('\n'.join(message))
+        return
+    
+    # Default listing
     keyboard = []
-    for name in sorted(video_db.keys()):
-        keyboard.append([InlineKeyboardButton(name, callback_data=f"video_{name}")])
+    for name, data in sorted(video_data.items()):
+        # Show title_name if available, otherwise title
+        display_name = data.get('title_name', name)
+        keyboard.append([InlineKeyboardButton(display_name, callback_data=f"video_{name}")])
     
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text('Available videos:', reply_markup=reply_markup)
@@ -950,7 +1060,7 @@ async def button(update: Update, context: CallbackContext) -> None:
                 )
 
 async def search_user_messages(update: Update, context: CallbackContext, search_term: str) -> None:
-    """Search through user messages for specific text"""
+    """Search through user messages in user_activity.json"""
     try:
         # Parse user filter syntax: "user:1234" or "user:@username"
         user_filter = None
@@ -961,7 +1071,7 @@ async def search_user_messages(update: Update, context: CallbackContext, search_
             parts = search_term.split('user:', 1)
             user_part = parts[1].split()[0]  # Get the user specifier
             actual_search_term = ' '.join(parts[1].split()[1:]) if len(parts[1].split()) > 1 else ''
-
+            
             # Check if user is ID or username
             if user_part.startswith('@'):
                 user_filter = {'username': user_part[1:].lower()}
@@ -976,39 +1086,48 @@ async def search_user_messages(update: Update, context: CallbackContext, search_
             await update.message.reply_text("Please provide a search term or user filter")
             return
 
-        if not os.path.exists('logs/message_logs.json'):
-            await update.message.reply_text("No message logs available yet.")
-            return
-        
-        with open('logs/message_logs.json', 'r', encoding='utf-8') as f:
-            # Read all lines as individual JSON objects
-            messages = [json.loads(line) for line in f if line.strip()]
+        activity_data = load_user_activity()
         
         # Filter messages containing the search term (case insensitive)
         results = []
-        for msg in messages:
+        for user_id, data in activity_data.items():
+            # Skip if no chat logs
+            if 'chat_log' not in data:
+                continue
+                
             # Apply user filter if specified
             if user_filter:
-                if 'user_id' in user_filter and msg.get('user_id') != user_filter['user_id']:
+                if 'user_id' in user_filter and int(user_id) != user_filter['user_id']:
                     continue
-                if 'username' in user_filter and msg.get('username', '').lower() != user_filter['username']:
+                if 'username' in user_filter and data.get('username', '').lower() != user_filter['username']:
                     continue
             
-            # Apply simple text search
-            if actual_search_term and actual_search_term.lower() not in msg.get('text', '').lower():
-                continue
-            
-            results.append(msg)
+            # Search through chat logs
+            for msg in data['chat_log']:
+                if actual_search_term and actual_search_term.lower() not in msg.get('text', '').lower():
+                    continue
+                
+                # Add matching messages to results
+                results.append({
+                    'timestamp': msg['timestamp'],
+                    'user_id': user_id,
+                    'username': data.get('username'),
+                    'first_name': data.get('first_name'),
+                    'text': msg['text']
+                })
         
         if not results:
-            await update.message.reply_text(f"No messages found containing:")
+            await update.message.reply_text("No matching messages found.")
             return
         
         # Format results with pagination
-        response = [f"🔍 Search results for:\n"]
+        response = ["🔍 Search results:"]
         if user_filter:
-            response[0] += f"👤 Filtered by user: {user_filter}\n"
-
+            response[0] += f" (filtered by user: {user_filter})"
+        
+        # Sort by timestamp (newest first)
+        results.sort(key=lambda x: x['timestamp'], reverse=True)
+        
         for i, msg in enumerate(results[:15], 1):  # Show first 15 results
             timestamp = datetime.fromisoformat(msg['timestamp']).strftime('%Y-%m-%d %H:%M')
             response.append(
@@ -1018,7 +1137,7 @@ async def search_user_messages(update: Update, context: CallbackContext, search_
             )
         
         if len(results) > 15:
-            response.append(f"\n\nℹ️ Showing 10 of {len(results)} results.")
+            response.append(f"\n\nℹ️ Showing 15 of {len(results)} results.")
         
         # Split long messages to avoid Telegram's message length limit
         full_response = '\n'.join(response)
@@ -1055,9 +1174,9 @@ async def user_stats(update: Update, context: CallbackContext) -> None:
     
     for user_id, data in activity_data.items():
         username = data.get('username', 'unknown')
-        video_count = len(data['videos'])
+        video_count = len(data.get('video_delivery_log', []))
         total_sends += video_count
-        last_video = data['videos'][-1]['video_name'] if data['videos'] else 'none'
+        last_video = data['video_delivery_log'][-1]['video_name'] if data.get('video_delivery_log') else 'none'
         
         message.append(
             f"\n👤 User: {username} (ID: {user_id})\n"
@@ -1142,7 +1261,7 @@ def main() -> None:
     application = Application.builder().token(TOKEN).build()
 
     # on different commands - answer in Telegram
-    application.add_handler(CommandHandler("sync", sync))  # Add this line
+    application.add_handler(CommandHandler("sync", sync))
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("addvideo", addvideo))
     application.add_handler(CommandHandler("rename", rename))
@@ -1155,6 +1274,7 @@ def main() -> None:
     application.add_handler(CommandHandler("videologs", video_logs))
     application.add_handler(CommandHandler("verifypayment", verify_payment))
     application.add_handler(CommandHandler("userlimit", user_limits))
+    application.add_handler(CommandHandler("updatemeta", update_metadata))
 
     # Handle button presses
     application.add_handler(CallbackQueryHandler(button))
