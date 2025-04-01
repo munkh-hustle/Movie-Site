@@ -142,7 +142,7 @@ def record_user_activity(user_id, username, first_name, last_name, video_name):
             'video_delivery_log': []
         }
     
-    # Keep the videos array for backward compatibility
+    # Keep the videos array for backward compatibility - for unique video
     activity_data[user_id_str]['videos'].append({
         'video_name': video_name,
         'timestamp': datetime.now().isoformat()
