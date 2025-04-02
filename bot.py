@@ -289,6 +289,42 @@ def save_payment_submission(payment_data):
     with open('db/payment_submissions.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
 
+def log_user_photo(user_id, username, first_name, photo_file_id, caption=None):
+    """Save user photo submissions to user_activity.json"""
+    activity_data = load_user_activity()
+    user_id_str = str(user_id)
+    
+    if user_id_str not in activity_data:
+        activity_data[user_id_str] = {
+            'username': username,
+            'first_name': first_name,
+            'last_name': '',
+            'videos': [],
+            'chat_log': [],
+            'photo_logs': []
+        }
+    
+    # Add photo to photo_logs
+    activity_data[user_id_str]['photo_logs'].append({
+        'timestamp': datetime.now().isoformat(),
+        'photo_file_id': photo_file_id,
+        'caption': caption
+    })
+    
+    save_user_activity(activity_data)
+
+async def handle_photo(update: Update, context: CallbackContext) -> None:
+    """Handle general photo submissions"""
+    user = update.effective_user
+    log_user_photo(
+        user_id=user.id,
+        username=user.username,
+        first_name=user.first_name,
+        photo_file_id=update.message.photo[-1].file_id,
+        caption=update.message.caption
+    )
+    await update.message.reply_text("Photo received and logged!")
+
 async def update_metadata(update: Update, context: CallbackContext) -> None:
     """Update video metadata (admin only)"""
     if not is_admin(update):
@@ -404,6 +440,15 @@ async def handle_screenshot(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
 
     try:
+        # Record the photo submission
+        log_user_photo(
+            user_id=user.id,
+            username=user.username,
+            first_name=user.first_name,
+            photo_file_id=update.message.photo[-1].file_id,  # Get the highest resolution photo
+            caption=update.message.caption
+        )
+
         # Record the submission
         payment_data = {
             'user_id': user.id,
@@ -418,7 +463,7 @@ async def handle_screenshot(update: Update, context: CallbackContext) -> None:
         # Notify user
         await update.message.reply_text(
             "Дэлгэцний зураг хүлээг авлаа!\n"
-            "Админ шалгах хүртэл түр хүлээнэ үү.\n\n"
+            "Админ шалгах хүртэл түр хүлээнэ үү.\n"
             f"Таны дугаар: {user.id}"
         )
                 
@@ -1283,6 +1328,7 @@ def main() -> None:
     application.add_handler(MessageHandler(filters.VIDEO, handle_video))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_handler(MessageHandler(filters.PHOTO & ~filters.COMMAND, handle_screenshot))
+    application.add_handler(MessageHandler(filters.PHOTO & ~filters.COMMAND, handle_photo))
 
     application.add_error_handler(error_handler)
 
