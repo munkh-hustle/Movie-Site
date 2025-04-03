@@ -770,7 +770,8 @@ async def addvideo(update: Update, context: CallbackContext) -> None:
                 "release": datetime.now().strftime('%B %Y'),
                 "poster": "",
                 "category": "other",
-                "file_id": video_file_id
+                "file_id": video_file_id,
+                "date_added": datetime.now().isoformat()
             }
         else:
             # Just update the file_id if video exists

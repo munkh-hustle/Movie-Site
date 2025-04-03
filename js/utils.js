@@ -16,16 +16,27 @@ async function loadMovieData() {
 
 // Get movies by category
 function getMoviesByCategory(category) {
-    return Object.values(movieData).filter(movie => 
-        movie.category.toLowerCase() === category.toLowerCase()
-    );
+    return Object.values(movieData)
+        .filter(movie => movie.category.toLowerCase() === category.toLowerCase())
+        .sort((a, b) => {
+            // Sort by date_added if available, otherwise use current order
+            if (a.date_added && b.date_added) {
+                return new Date(b.date_added) - new Date(a.date_added);
+            }
+            return 0;
+        });
 }
 
 // Get newest movies
 function getNewestMovies(limit = 5) {
     const allMovies = Object.values(movieData);
     return allMovies
-        .sort((a, b) => new Date(b.release) - new Date(a.release))
+        .sort((a, b) => {
+            if (a.date_added && b.date_added) {
+                return new Date(b.date_added) - new Date(a.date_added);
+            }
+            return 0;
+        })
         .slice(0, limit);
 }
 
