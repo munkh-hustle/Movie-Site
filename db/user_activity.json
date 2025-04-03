@@ -13,7 +13,18 @@
         "timestamp": "2025-04-02T14:28:14.687649"
       }
     ],
-    "chat_log": [],
+    "chat_log": [
+      {
+        "timestamp": "2025-04-03T09:47:43.121221",
+        "text": "Bnu",
+        "chat_type": "private"
+      },
+      {
+        "timestamp": "2025-04-03T09:47:48.487348",
+        "text": "Yu bn",
+        "chat_type": "private"
+      }
+    ],
     "photo_logs": [],
     "video_delivery_log": [
       {
