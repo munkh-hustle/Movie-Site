@@ -3,16 +3,7 @@
     "username": "muunu03",
     "first_name": "Solongos",
     "last_name": "Khel",
-    "videos": [
-      {
-        "video_name": "secret-relationship-1-1",
-        "timestamp": "2025-04-02T01:12:10.436653"
-      },
-      {
-        "video_name": "secret-relationship-1-1",
-        "timestamp": "2025-04-02T14:28:14.687649"
-      }
-    ],
+    "videos": [],
     "chat_log": [
       {
         "timestamp": "2025-04-03T09:47:43.121221",
@@ -25,7 +16,13 @@
         "chat_type": "private"
       }
     ],
-    "photo_logs": [],
+    "photo_logs": [
+      {
+        "timestamp": "2025-04-03T17:05:59.526623",
+        "photo_file_id": "AgACAgUAAxkBAAIJMGfuT3aN5PYIuljRggqoI3mtHglMAAKWvjEbOhhxVzGMhkuaFsE_AQADAgADeQADNgQ",
+        "caption": null
+      }
+    ],
     "video_delivery_log": [
       {
         "timestamp": "2025-04-02T01:12:11.041760",
@@ -35,6 +32,26 @@
       {
         "timestamp": "2025-04-02T14:28:15.173044",
         "video_name": "secret-relationship-1-1",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-03T17:04:31.434451",
+        "video_name": "bros-2xxx",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-03T17:04:51.879796",
+        "video_name": "queer-as-folk-1-1",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-03T17:05:03.856102",
+        "video_name": "monster-2xxx",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-03T17:05:17.889445",
+        "video_name": "brokeback-mountain-2005",
         "status": "sent"
       }
     ]
