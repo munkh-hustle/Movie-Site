@@ -55,5 +55,19 @@
         "status": "sent"
       }
     ]
+  },
+  "7905267896": {
+    "username": null,
+    "first_name": "404",
+    "last_name": "",
+    "videos": [],
+    "chat_log": [
+      {
+        "timestamp": "2025-04-03T21:56:54.398756",
+        "text": "Admin sent message to 7942816218: hii this is test",
+        "chat_type": "private"
+      }
+    ],
+    "photo_logs": []
   }
 }

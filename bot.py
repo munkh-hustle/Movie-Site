@@ -2,6 +2,8 @@ import os
 import logging
 import json
 import io
+import asyncio
+from telegram.error import RetryAfter
 from PIL import Image
 from datetime import datetime
 from telegram import InputMediaPhoto
@@ -312,6 +314,75 @@ def log_user_photo(user_id, username, first_name, photo_file_id, caption=None):
     })
     
     save_user_activity(activity_data)
+
+async def _send_broadcast(context: CallbackContext):
+    job = context.job
+    message = job.data['message']
+    activity_data = load_user_activity()
+
+    success = 0
+    failed = 0
+
+    for user_id_str in activity_data:
+        try:
+            await context.bot.send_message(
+                chat_id=int(user_id_str),
+                text=message
+            )
+            success += 1
+        except RetryAfter as e:
+            # Handle flood limits
+            await asyncio.sleep(e.retry_after)
+            await context.bot.send_message(
+                chat_id=int(user_id_str),
+                text=message
+            )
+            success += 1
+        except Exception as e:
+            failed += 1
+            logger.error(f"Failed to send to {user_id_str}: {e}")
+
+    # Notify admin of results
+    await context.bot.send_message(
+        chat_id=ADMIN_ID,
+        text=f"📢 Broadcast results:\n✅ Success: {success}\n❌ Failed: {failed}"
+    )
+
+async def schedule_broadcast(update: Update, context: CallbackContext):
+    if not is_admin(update):
+        await update.message.reply_text("❌ Admin only.")
+        return
+
+    if len(context.args) < 3:
+        await update.message.reply_text(
+            "Usage: /schedulebroadcast <YYYY-MM-DD> <HH:MM> <message>\n"
+            "Example: /schedulebroadcast 2023-12-25 10:00 'Merry Christmas!'"
+        )
+        return
+
+    try:
+        # Parse datetime
+        date_str = context.args[0]
+        time_str = context.args[1]
+        message = ' '.join(context.args[2:])
+        scheduled_time = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+
+        # Schedule the job
+        context.job_queue.run_once(
+            callback=_send_broadcast,
+            when=scheduled_time,
+            data={'message': message},
+            name=f"broadcast_{scheduled_time}"
+        )
+
+        await update.message.reply_text(
+            f"✅ Broadcast scheduled for {scheduled_time}!\n"
+            f"Message: {message}"
+        )
+
+    except ValueError as e:
+        await update.message.reply_text(f"❌ Invalid date/time format. Use YYYY-MM-DD HH:MM.\nError: {e}")
+
 async def send_message_to_user(update: Update, context: CallbackContext) -> None:
     """Send a message to a specific user (admin only)"""
     if not is_admin(update):
@@ -1363,6 +1434,7 @@ def main() -> None:
     application.add_handler(CommandHandler("userlimit", user_limits))
     application.add_handler(CommandHandler("updatemeta", update_metadata))
     application.add_handler(CommandHandler("sendmessage", send_message_to_user))
+    application.add_handler(CommandHandler("schedulebroadcast", schedule_broadcast))
 
     # Handle button presses
     application.add_handler(CallbackQueryHandler(button))
