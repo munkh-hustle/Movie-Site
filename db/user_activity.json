@@ -14,6 +14,11 @@
         "timestamp": "2025-04-03T09:47:48.487348",
         "text": "Yu bn",
         "chat_type": "private"
+      },
+      {
+        "timestamp": "2025-04-04T03:08:51.382073",
+        "text": "Thanks",
+        "chat_type": "private"
       }
     ],
     "photo_logs": [
@@ -53,6 +58,11 @@
         "timestamp": "2025-04-03T17:05:17.889445",
         "video_name": "brokeback-mountain-2005",
         "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-04T03:05:38.700434",
+        "video_name": "secret-relationship-1-1",
+        "status": "sent"
       }
     ]
   },
@@ -60,14 +70,40 @@
     "username": null,
     "first_name": "404",
     "last_name": "",
-    "videos": [],
+    "videos": [
+      {
+        "video_name": "bl-queer-as-folk-1-1",
+        "timestamp": "2025-04-04T03:31:30.951585"
+      },
+      {
+        "video_name": "time-out-2015",
+        "timestamp": "2025-04-04T03:34:30.059465"
+      }
+    ],
     "chat_log": [
       {
         "timestamp": "2025-04-03T21:56:54.398756",
         "text": "Admin sent message to 7942816218: hii this is test",
         "chat_type": "private"
+      },
+      {
+        "timestamp": "2025-04-04T03:25:35.178124",
+        "text": "Lol what",
+        "chat_type": "private"
       }
     ],
-    "photo_logs": []
+    "photo_logs": [],
+    "video_delivery_log": [
+      {
+        "timestamp": "2025-04-04T03:31:31.471718",
+        "video_name": "bl-queer-as-folk-1-1",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-04T03:34:30.879023",
+        "video_name": "time-out-2015",
+        "status": "sent"
+      }
+    ]
   }
 }
