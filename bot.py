@@ -312,6 +312,47 @@ def log_user_photo(user_id, username, first_name, photo_file_id, caption=None):
     })
     
     save_user_activity(activity_data)
+async def send_message_to_user(update: Update, context: CallbackContext) -> None:
+    """Send a message to a specific user (admin only)"""
+    if not is_admin(update):
+        await update.message.reply_text("Зөвхөн админ.")
+        return
+    
+    if len(context.args) < 2:
+        await update.message.reply_text(
+            "Usage: /sendmessage <user_id> <message>\n\n"
+            "Example: /sendmessage 12345678 Hello, this is a test message"
+        )
+        return
+    
+    try:
+        user_id = int(context.args[0])
+        message = ' '.join(context.args[1:])
+        
+        # Try to send the message
+        await context.bot.send_message(
+            chat_id=user_id,
+            text=message
+        )
+        
+        await update.message.reply_text(f"Message sent to user {user_id}")
+        
+        # Log this action
+        log_user_message(
+            user_id=update.effective_user.id,
+            username=update.effective_user.username,
+            first_name=update.effective_user.first_name,
+            text=f"Admin sent message to {user_id}: {message}",
+            chat_type=update.effective_chat.type
+        )
+        
+    except ValueError:
+        await update.message.reply_text("Invalid user ID. Must be a number.")
+    except Exception as e:
+        logger.error(f"Error sending message to user: {e}")
+        await update.message.reply_text(
+            f"Failed to send message to user. Error: {str(e)}"
+        )
 
 async def handle_photo(update: Update, context: CallbackContext) -> None:
     """Handle general photo submissions"""
@@ -1321,6 +1362,7 @@ def main() -> None:
     application.add_handler(CommandHandler("verifypayment", verify_payment))
     application.add_handler(CommandHandler("userlimit", user_limits))
     application.add_handler(CommandHandler("updatemeta", update_metadata))
+    application.add_handler(CommandHandler("sendmessage", send_message_to_user))
 
     # Handle button presses
     application.add_handler(CallbackQueryHandler(button))
