@@ -70,16 +70,7 @@
     "username": null,
     "first_name": "404",
     "last_name": "",
-    "videos": [
-      {
-        "video_name": "bl-queer-as-folk-1-1",
-        "timestamp": "2025-04-04T03:31:30.951585"
-      },
-      {
-        "video_name": "time-out-2015",
-        "timestamp": "2025-04-04T03:34:30.059465"
-      }
-    ],
+    "videos": [],
     "chat_log": [
       {
         "timestamp": "2025-04-03T21:56:54.398756",
@@ -102,6 +93,36 @@
       {
         "timestamp": "2025-04-04T03:34:30.879023",
         "video_name": "time-out-2015",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-04T16:43:26.733853",
+        "video_name": "bl-queer-as-folk-1-1",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-04T16:43:36.921857",
+        "video_name": "brokeback-mountain-2005",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-04T16:43:41.701417",
+        "video_name": "bros-2xxx",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-04T16:43:46.105852",
+        "video_name": "brokeback-mountain-2005",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-04T16:43:48.876129",
+        "video_name": "bros-2xxx",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-04T16:43:55.219077",
+        "video_name": "monster-2023",
         "status": "sent"
       }
     ]
