@@ -7,6 +7,7 @@ from telegram.error import RetryAfter
 from PIL import Image
 from datetime import datetime
 from telegram import InputMediaPhoto
+from telegram import Message, Chat, User
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -1308,8 +1309,14 @@ async def search_user_messages(update: Update, context: CallbackContext, search_
 
 async def handle_video(update: Update, context: CallbackContext) -> None:
     """Handle video messages"""
+    if update.effective_user is None:
+        return  # Skip processing if there's no associated user
+    
     if is_admin(update):
-        await update.message.reply_text("To add this video, reply to it with /addvideo <name>")
+        await update.message.reply_text(
+            "To add this video to the database, reply to it with /addvideo <name>"
+        )
+        
 async def user_stats(update: Update, context: CallbackContext) -> None:
     """Show user activity statistics (admin only)"""
     if not is_admin(update):
@@ -1400,6 +1407,63 @@ async def verify_payment(update: Update, context: CallbackContext) -> None:
             
     except ValueError:
         await update.message.reply_text("Invalid user ID. Must be a number.")
+        
+async def send_video_to_user(update: Update, context: CallbackContext) -> None:
+    """Send a video to a specific user (admin only)"""
+    if not is_admin(update):
+        await update.message.reply_text("Зөвхөн админ.")
+        return
+    
+    if len(context.args) < 2:
+        await update.message.reply_text(
+            "Usage: /sendvideo <user_id> <video_name>\n\n"
+            "Example: /sendvideo 12345678 secret-relationship-1-1"
+        )
+        return
+    
+    try:
+        user_id = int(context.args[0])
+        video_name = ' '.join(context.args[1:])
+        
+        if video_name not in video_db:
+            await update.message.reply_text(f"Video '{video_name}' not found.")
+            return
+            
+        # Send the video directly without using send_video_with_limit_check
+        try:
+            await context.bot.send_video(
+                chat_id=user_id,
+                video=video_db[video_name],
+                protect_content=True,
+                caption="Админаас илгээсэн кино"
+            )
+            await update.message.reply_text(f"✅ Video '{video_name}' sent to user {user_id}")
+            
+            # Log this action
+            log_user_message(
+                user_id=update.effective_user.id,
+                username=update.effective_user.username,
+                first_name=update.effective_user.first_name,
+                text=f"Admin sent video {video_name} to {user_id}",
+                chat_type=update.effective_chat.type
+            )
+            
+        except Exception as e:
+            await update.message.reply_text(f"Failed to send to user {user_id}. Error: {str(e)}")
+            
+    except ValueError:
+        await update.message.reply_text("Invalid user ID. Must be a number.")
+    except Exception as e:
+        logger.error(f"Error in send_video_to_user: {e}")
+        await update.message.reply_text(f"Error: {str(e)}")
+            
+    except ValueError:
+        await update.message.reply_text("Invalid user ID. Must be a number.")
+    except Exception as e:
+        logger.error(f"Error sending video to user: {e}")
+        await update.message.reply_text(
+            f"Failed to send video to user. Error: {str(e)}"
+        )
 
 def main() -> None:
     """Start the bot."""
@@ -1435,6 +1499,7 @@ def main() -> None:
     application.add_handler(CommandHandler("updatemeta", update_metadata))
     application.add_handler(CommandHandler("sendmessage", send_message_to_user))
     application.add_handler(CommandHandler("schedulebroadcast", schedule_broadcast))
+    application.add_handler(CommandHandler("sendvideo", send_video_to_user))
 
     # Handle button presses
     application.add_handler(CallbackQueryHandler(button))
