@@ -294,6 +294,27 @@ body {
     margin-right: 8px;
 }
 
+.trailer-btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    background-color: #ff5722;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: 500;
+    margin-top: 1rem;
+    margin-left: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.trailer-btn:hover {
+    background-color: #e64a19;
+}
+
+.trailer-btn i {
+    margin-right: 8px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .movies-grid {

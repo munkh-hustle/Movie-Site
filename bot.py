@@ -800,6 +800,49 @@ async def start(update: Update, context: CallbackContext) -> None:
             success = await send_video_with_limit_check(update, context, user, video_name)
             if not success:
                 return
+    elif context.args and context.args[0].startswith('trailer_'):
+        video_name = context.args[0][8:]
+        video_data = load_video_data()
+        
+        if video_name not in video_data:
+            await update.message.reply_text("Кино олдсонгүй.")
+            return
+            
+        trailers = video_data[video_name].get('trailer_ids', [])
+        
+        if not trailers:
+            await update.message.reply_text("Энэ кинонд трейлер олдсонгүй.")
+            return
+            
+        await update.message.reply_text("Трейлерүүд илгээж байна...")
+        
+        # Send all trailers
+        for trailer_id in trailers[:5]:  # Limit to 5 trailers
+            try:
+                await context.bot.send_video(
+                    chat_id=update.effective_chat.id,
+                    video=trailer_id,
+                    protect_content=True
+                )
+                await asyncio.sleep(1)  # Small delay between trailers
+            except Exception as e:
+                logger.error(f"Error sending trailer: {e}")
+                continue
+                
+        # Ask if they want to watch the full movie
+        keyboard = [
+            [InlineKeyboardButton("Тийм", callback_data=f"video_{video_name}")],
+            [InlineKeyboardButton("Үгүй", callback_data="trailer_no")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="Киног бүрэн үзэх үү?",
+            reply_markup=reply_markup
+        )
+        return
+
             
     if video_name is not None:  # Only show this if we were actually looking for a video
         await update.message.reply_text(f"Хэрвээ кино аваагүй бол админтай холбогдоно уу. Үргэлжлүүлэн үзэх бол www.kino.com")
@@ -884,6 +927,7 @@ async def addvideo(update: Update, context: CallbackContext) -> None:
                 "poster": "",
                 "category": "other",
                 "file_id": video_file_id,
+                "trailer_ids": [],
                 "date_added": datetime.now().isoformat()
             }
         else:
@@ -899,6 +943,42 @@ async def addvideo(update: Update, context: CallbackContext) -> None:
         await update.message.reply_text(f"Video '{video_name}' added successfully!")
     else:
         await update.message.reply_text("Please reply to a video message with this command.")
+
+async def addtrailer(update: Update, context: CallbackContext) -> None:
+    """Add trailer to a video (admin only)"""
+    if not is_admin(update):
+        await update.message.reply_text("Зөвхөн админ.")
+        return
+    
+    if len(context.args) < 1:
+        await update.message.reply_text("Usage: /addtrailer <video_name> (reply to a video)")
+        return
+    
+    if update.message.reply_to_message and update.message.reply_to_message.video:
+        video_name = ' '.join(context.args)
+        trailer_file_id = update.message.reply_to_message.video.file_id
+        
+        video_data = load_video_data()
+        
+        if video_name not in video_data:
+            await update.message.reply_text(f"Video '{video_name}' not found. Add it first with /addvideo")
+            return
+            
+        # Initialize trailers array if not exists
+        if 'trailer_ids' not in video_data[video_name]:
+            video_data[video_name]['trailer_ids'] = []
+            
+        # Add the trailer
+        video_data[video_name]['trailer_ids'].append(trailer_file_id)
+        save_video_data(video_data)
+        
+        await update.message.reply_text(
+            f"✅ Trailer added to '{video_name}'!\n"
+            f"Total trailers: {len(video_data[video_name]['trailer_ids'])}"
+        )
+    else:
+        await update.message.reply_text("Please reply to a video message with this command.")
+
 
 async def sync(update: Update, context: CallbackContext) -> None:
     """Manually sync video data (admin only)"""
@@ -1071,7 +1151,9 @@ async def button(update: Update, context: CallbackContext) -> None:
                         chat_id=user.id,
                         text="An error occurred while processing your request."
                     )
-                
+
+        elif query.data == 'trailer_no':
+            await query.edit_message_text(text="За, дараа үзнэ үү!")   
 
         elif query.data.startswith('unblock_'):
             user_id = int(query.data[8:])
@@ -1316,7 +1398,7 @@ async def handle_video(update: Update, context: CallbackContext) -> None:
         await update.message.reply_text(
             "To add this video to the database, reply to it with /addvideo <name>"
         )
-        
+
 async def user_stats(update: Update, context: CallbackContext) -> None:
     """Show user activity statistics (admin only)"""
     if not is_admin(update):
@@ -1500,6 +1582,8 @@ def main() -> None:
     application.add_handler(CommandHandler("sendmessage", send_message_to_user))
     application.add_handler(CommandHandler("schedulebroadcast", schedule_broadcast))
     application.add_handler(CommandHandler("sendvideo", send_video_to_user))
+    application.add_handler(CommandHandler("addtrailer", addtrailer))
+
 
     # Handle button presses
     application.add_handler(CallbackQueryHandler(button))

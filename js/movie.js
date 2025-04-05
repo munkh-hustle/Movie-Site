@@ -30,4 +30,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Set Telegram link (still using title for the backend)
     const telegramLink = document.getElementById('telegram-link');
     telegramLink.href = `https://t.me/lgbt_kino_bot?start=video_${encodeURIComponent(movie.title)}`;
+
+    // Trailer
+    const trailerLink = document.getElementById('trailer-link');
+    trailerLink.href = `https://t.me/lgbt_kino_bot?start=trailer_${encodeURIComponent(movie.title)}`;
 });

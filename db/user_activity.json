@@ -70,7 +70,12 @@
     "username": null,
     "first_name": "404",
     "last_name": "",
-    "videos": [],
+    "videos": [
+      {
+        "video_name": "bros-2xxx",
+        "timestamp": "2025-04-06T02:34:45.931767"
+      }
+    ],
     "chat_log": [
       {
         "timestamp": "2025-04-03T21:56:54.398756",
@@ -128,6 +133,11 @@
       {
         "timestamp": "2025-04-04T16:43:55.219077",
         "video_name": "monster-2023",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-06T02:34:46.566744",
+        "video_name": "bros-2xxx",
         "status": "sent"
       }
     ]
