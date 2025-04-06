@@ -29,12 +29,12 @@ logger = logging.getLogger(__name__)
 ADMIN_ID = 7905267896
 
 # User activity log file
-USER_ACTIVITY_FILE = 'db/user_activity.json'
+USER_ACTIVITY_FILE = 'lgbtlex/db/user_activity.json'
 
-BLOCKED_USERS_FILE = 'db/blocked_users.json'
+BLOCKED_USERS_FILE = 'lgbtlex/db/blocked_users.json'
 MAX_VIDEOS_BEFORE_BLOCK = 5
 
-USER_LIMITS_FILE = 'db/user_limits.json'
+USER_LIMITS_FILE = 'lgbtlex/db/user_limits.json'
 
 # Dictionary to store video IDs and names
 video_db = {}
@@ -42,14 +42,14 @@ def load_video_db():
     """Load video database from movie-details.json file"""
     global video_db
     try:
-        with open('movie-details.json', 'r', encoding='utf-8') as f:
+        with open('lgbtlex/movie-details.json', 'r', encoding='utf-8') as f:
             video_data = json.load(f)
             # Create a simplified mapping of title to file_id for backward compatibility
             video_db = {title: data['file_id'] for title, data in video_data.items()}
     except (FileNotFoundError, json.JSONDecodeError):
         video_db = {}
         # Initialize with empty movie-details.json if it doesn't exist
-        with open('movie-details.json', 'w', encoding='utf-8') as f:
+        with open('lgbtlex/movie-details.json', 'w', encoding='utf-8') as f:
             json.dump({}, f, indent=2)
 
 def save_video_db():
@@ -163,7 +163,7 @@ def record_user_activity(user_id, username, first_name, last_name, video_name):
 def load_video_data():
     """Load video metadata from movie-details.json file"""
     try:
-        with open('movie-details.json', 'r', encoding='utf-8') as f:
+        with open('lgbtlex/movie-details.json', 'r', encoding='utf-8') as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError) as e:
         logger.error(f"Error loading movie-details.json: {e}")
@@ -171,7 +171,7 @@ def load_video_data():
     
 def save_video_data(video_data):
     """Save video metadata to movie-details.json file"""
-    with open('movie-details.json', 'w', encoding='utf-8') as f:
+    with open('lgbtlex/movie-details.json', 'w', encoding='utf-8') as f:
         json.dump(video_data, f, indent=2)
 
 def sync_video_data():
@@ -260,7 +260,7 @@ def log_sent_video(user_id, video_name):
 def update_payment_status(user_id, status):
     """Update payment status in the database"""
     try:
-        with open('db/payment_submissions.json', 'r+', encoding='utf-8') as f:
+        with open('lgbtlex/db/payment_submissions.json', 'r+', encoding='utf-8') as f:
             data = json.load(f)
             
         # Find most recent submission from this user
@@ -270,7 +270,7 @@ def update_payment_status(user_id, status):
                 submission['processed_at'] = datetime.now().isoformat()
                 break
                 
-        with open('db/payment_submissions.json', 'w', encoding='utf-8') as f:
+        with open('lgbtlex/db/payment_submissions.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2)
             
     except Exception as e:
@@ -279,7 +279,7 @@ def update_payment_status(user_id, status):
 def save_payment_submission(payment_data):
     """Save payment submission to JSON file"""
     try:
-        with open('db/payment_submissions.json', 'r+', encoding='utf-8') as f:
+        with open('lgbtlex/db/payment_submissions.json', 'r+', encoding='utf-8') as f:
             try:
                 data = json.load(f)
             except json.JSONDecodeError:
@@ -289,7 +289,7 @@ def save_payment_submission(payment_data):
     
     data.append(payment_data)
     
-    with open('db/payment_submissions.json', 'w', encoding='utf-8') as f:
+    with open('lgbtlex/db/payment_submissions.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
 
 def log_user_photo(user_id, username, first_name, photo_file_id, caption=None):
@@ -845,7 +845,7 @@ async def start(update: Update, context: CallbackContext) -> None:
 
             
     if video_name is not None:  # Only show this if we were actually looking for a video
-        await update.message.reply_text(f"Хэрвээ кино аваагүй бол админтай холбогдоно уу. Үргэлжлүүлэн үзэх бол www.kino.com")
+        await update.message.reply_text(f"Өшөө олон кино үзэх бол www.kino.com")
     else:
         await update.message.reply_text(f'Сайн байна уу? {user.first_name}!. www.kino.mn руу орж киногоо сонгоно уу.')
 

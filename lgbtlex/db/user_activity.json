@@ -3,7 +3,12 @@
     "username": "muunu03",
     "first_name": "Solongos",
     "last_name": "Khel",
-    "videos": [],
+    "videos": [
+      {
+        "video_name": "bl-queer-as-folk-1-1",
+        "timestamp": "2025-04-06T11:42:09.035526"
+      }
+    ],
     "chat_log": [
       {
         "timestamp": "2025-04-03T09:47:43.121221",
@@ -62,6 +67,11 @@
       {
         "timestamp": "2025-04-04T03:05:38.700434",
         "video_name": "secret-relationship-1-1",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-06T11:42:09.565004",
+        "video_name": "bl-queer-as-folk-1-1",
         "status": "sent"
       }
     ]
