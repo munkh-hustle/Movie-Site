@@ -42,14 +42,14 @@ def load_video_db():
     """Load video database from movie-details.json file"""
     global video_db
     try:
-        with open('lgbtlex/movie-details.json', 'r', encoding='utf-8') as f:
+        with open('movie-details.json', 'r', encoding='utf-8') as f:
             video_data = json.load(f)
             # Create a simplified mapping of title to file_id for backward compatibility
             video_db = {title: data['file_id'] for title, data in video_data.items()}
     except (FileNotFoundError, json.JSONDecodeError):
         video_db = {}
         # Initialize with empty movie-details.json if it doesn't exist
-        with open('lgbtlex/movie-details.json', 'w', encoding='utf-8') as f:
+        with open('movie-details.json', 'w', encoding='utf-8') as f:
             json.dump({}, f, indent=2)
 
 def save_video_db():
@@ -163,7 +163,7 @@ def record_user_activity(user_id, username, first_name, last_name, video_name):
 def load_video_data():
     """Load video metadata from movie-details.json file"""
     try:
-        with open('lgbtlex/movie-details.json', 'r', encoding='utf-8') as f:
+        with open('movie-details.json', 'r', encoding='utf-8') as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError) as e:
         logger.error(f"Error loading movie-details.json: {e}")
@@ -171,7 +171,7 @@ def load_video_data():
     
 def save_video_data(video_data):
     """Save video metadata to movie-details.json file"""
-    with open('lgbtlex/movie-details.json', 'w', encoding='utf-8') as f:
+    with open('movie-details.json', 'w', encoding='utf-8') as f:
         json.dump(video_data, f, indent=2)
 
 def sync_video_data():
