@@ -7,6 +7,10 @@
       {
         "video_name": "bl-queer-as-folk-1-1",
         "timestamp": "2025-04-06T11:42:09.035526"
+      },
+      {
+        "video_name": "secret-relationship-1-1",
+        "timestamp": "2025-04-06T21:50:00.036530"
       }
     ],
     "chat_log": [
@@ -72,6 +76,11 @@
       {
         "timestamp": "2025-04-06T11:42:09.565004",
         "video_name": "bl-queer-as-folk-1-1",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-06T21:50:00.638190",
+        "video_name": "secret-relationship-1-1",
         "status": "sent"
       }
     ]
