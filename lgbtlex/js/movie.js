@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const movieTitle = getUrlParameter('title');
     if (!movieTitle || !movieData[movieTitle]) {
-        window.location.href = 'index.html';
+        window.location.href = 'lgbtlex.html';
         return;
     }
     

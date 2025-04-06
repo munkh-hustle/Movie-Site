@@ -3,45 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rainbow Cinema - LGBT Movies</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Movies and Animes</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <header class="rainbow-header">
+    <header class="dark-header">
         <div class="container">
-            <h1>🌈 Rainbow Cinema</h1>
+            <h1><i class="fas fa-film"></i> Meme-lex Cinema</h1>
             <nav>
                 <ul>
                     <li><a href="index.html" class="active">Home</a></li>
-                    <li><a href="bl.html">BL Series</a></li>
-                    <li><a href="gl.html">GL Series</a></li>
+                    <li><a href="/lgbtlex/animelex.html">Animelex</a></li>
+                    <li><a href="/lgbtlex/movielex.html">Movielex</a></li>
+                    <li><a href="/lgbtlex/seriallex.html">Seriallex</a></li>
+                    <li><a href="/lgbtlex/lgbtlex.html">LGBTlex</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
     <main class="container">
-        <section class="new-releases">
-            <h2><i class="fas fa-heart"></i> New BL Releases</h2>
-            <div class="movies-grid" id="bl-movies">
-                <!-- Filled by JavaScript -->
+        <section class="category-buttons">
+            <div class="button-grid">
+                <a href="/lgbtlex/lgbtlex.html" class="category-button">
+                    <div class="button-content">
+                        <i class="fas fa-heart"></i>
+                        <h3>LGBTlex</h3>
+                        <p>BL & GL</p>
+                    </div>
+                </a>
+                <a href="/lgbtlex/animelex.html" class="category-button">
+                    <div class="button-content">
+                        <i class="fas fa-film"></i>
+                        <h3>Animelex</h3>
+                        <p>Anime Series</p>
+                    </div>
+                </a>
+                <a href="/lgbtlex/movielex.html" class="category-button">
+                    <div class="button-content">
+                        <i class="fas fa-video"></i>
+                        <h3>Movielex</h3>
+                        <p>All Movies</p>
+                    </div>
+                </a>
+                <a href="/lgbtlex/seriallex.html" class="category-button">
+                    <div class="button-content">
+                        <i class="fas fa-tv"></i>
+                        <h3>Seriallex</h3>
+                        <p>TV Series</p>
+                    </div>
+                </a>
             </div>
-            <a href="bl.html" class="view-more">View More BL →</a>
         </section>
 
         <section class="new-releases">
-            <h2><i class="fas fa-heart"></i> New GL Releases</h2>
-            <div class="movies-grid" id="gl-movies">
+            <h2><i class="fas fa-fire"></i> Trending Now</h2>
+            <div class="movies-grid" id="trending-movies">
                 <!-- Filled by JavaScript -->
             </div>
-            <a href="gl.html" class="view-more">View More GL →</a>
         </section>
     </main>
 
-    <footer class="rainbow-footer">
+    <footer class="dark-footer">
         <div class="container">
-            <p>© 2025 Rainbow Cinema</p>
+            <p>© 2025 Meme Cinema</p>
             <div class="social-links">
                 <a href="#"><i class="fab fa-telegram"></i></a>
                 <a href="#"><i class="fab fa-twitter"></i></a>
@@ -49,8 +75,9 @@
             </div>
         </div>
     </footer>
-
-    <script src="js/utils.js"></script>
-    <script src="js/main.js"></script>
+    <!-- 
+    <script src="/lgbtlex/js/utils.js"></script>
+    <script src="/lgbtlex/js/lgbtlex.js"></script>
+    -->
 </body>
 </html>
