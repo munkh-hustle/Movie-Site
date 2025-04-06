@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movielex</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <h1>Movie</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="main.html">All Movies</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container movie-details-container">
+        <div class="movie-poster">
+            <img id="movie-poster" src="" alt="Movie Poster">
+        </div>
+        
+        <div class="movie-info">
+            <h1 id="movie-title"></h1>
+            <div class="movie-meta">
+                <span id="movie-year"></span>
+                <span id="movie-duration"></span>
+                <span id="movie-rating"></span>
+            </div>
+            
+            <div class="movie-genres" id="movie-genres"></div>
+            
+            <p class="movie-description" id="movie-description"></p>
+            
+            <div class="movie-cast">
+                <h3><i class="fas fa-users"></i> Cast</h3>
+                <p id="movie-cast"></p>
+            </div>
+            
+            <div class="movie-director">
+                <h3><i class="fas fa-video"></i> Director</h3>
+                <p id="movie-director"></p>
+            </div>
+            
+            <div class="movie-release">
+                <h3><i class="fas fa-calendar-alt"></i> Release Date</h3>
+                <p id="movie-release"></p>
+            </div>
+            
+            <a href="#" id="telegram-link" class="telegram-btn">
+                <i class="fab fa-telegram"></i> Watch on Telegram
+            </a>
+            
+            <a href="#" id="trailer-link" class="trailer-btn">
+                <i class="fas fa-play"></i> Watch Trailer
+            </a>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>© 2025 Memelex Cinema</p>
+        </div>
+    </footer>
+
+    <script src="js/utils.js"></script>
+    <script src="js/movie.js"></script>
+</body>
+</html>

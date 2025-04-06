@@ -29,12 +29,12 @@ logger = logging.getLogger(__name__)
 ADMIN_ID = 7905267896
 
 # User activity log file
-USER_ACTIVITY_FILE = 'lgbtlex/db/user_activity.json'
+USER_ACTIVITY_FILE = 'db/user_activity.json'
 
-BLOCKED_USERS_FILE = 'lgbtlex/db/blocked_users.json'
+BLOCKED_USERS_FILE = 'db/blocked_users.json'
 MAX_VIDEOS_BEFORE_BLOCK = 5
 
-USER_LIMITS_FILE = 'lgbtlex/db/user_limits.json'
+USER_LIMITS_FILE = 'db/user_limits.json'
 
 # Dictionary to store video IDs and names
 video_db = {}
@@ -289,7 +289,7 @@ def save_payment_submission(payment_data):
     
     data.append(payment_data)
     
-    with open('lgbtlex/db/payment_submissions.json', 'w', encoding='utf-8') as f:
+    with open('db/payment_submissions.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
 
 def log_user_photo(user_id, username, first_name, photo_file_id, caption=None):
