@@ -93,6 +93,10 @@
       {
         "video_name": "bros-2xxx",
         "timestamp": "2025-04-06T02:34:45.931767"
+      },
+      {
+        "video_name": "sakamoto-days-1-7",
+        "timestamp": "2025-04-07T21:26:39.182307"
       }
     ],
     "chat_log": [
@@ -157,6 +161,11 @@
       {
         "timestamp": "2025-04-06T02:34:46.566744",
         "video_name": "bros-2xxx",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-07T21:26:39.883786",
+        "video_name": "sakamoto-days-1-7",
         "status": "sent"
       }
     ]
