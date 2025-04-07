@@ -6,5 +6,13 @@
     "timestamp": "2025-04-03T17:05:59.529895",
     "status": "approved",
     "processed_at": "2025-04-03T17:06:28.072485"
+  },
+  {
+    "user_id": 7905267896,
+    "username": null,
+    "first_name": "404",
+    "timestamp": "2025-04-08T00:26:21.245722",
+    "status": "approved",
+    "processed_at": "2025-04-08T00:27:03.512968"
   }
 ]

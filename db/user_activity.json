@@ -98,20 +98,7 @@
     "username": null,
     "first_name": "404",
     "last_name": "",
-    "videos": [
-      {
-        "video_name": "bros-2xxx",
-        "timestamp": "2025-04-06T02:34:45.931767"
-      },
-      {
-        "video_name": "sakamoto-days-1-7",
-        "timestamp": "2025-04-07T21:26:39.182307"
-      },
-      {
-        "video_name": "sakamoto-days-1-1",
-        "timestamp": "2025-04-07T21:46:37.601909"
-      }
-    ],
+    "videos": [],
     "chat_log": [
       {
         "timestamp": "2025-04-03T21:56:54.398756",
@@ -129,7 +116,13 @@
         "chat_type": "private"
       }
     ],
-    "photo_logs": [],
+    "photo_logs": [
+      {
+        "timestamp": "2025-04-08T00:26:21.239129",
+        "photo_file_id": "AgACAgUAAxkBAAIKQmfz_KxaoFCfxjSXnbR5neqNPM2fAALjwjEb9i-hV44I6i2uoHosAQADAgADeQADNgQ",
+        "caption": null
+      }
+    ],
     "video_delivery_log": [
       {
         "timestamp": "2025-04-04T03:31:31.471718",
@@ -184,6 +177,16 @@
       {
         "timestamp": "2025-04-07T21:46:38.316162",
         "video_name": "sakamoto-days-1-1",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-08T00:25:43.619332",
+        "video_name": "time-out-2015",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-08T00:25:46.385730",
+        "video_name": "secret-relationship-1-8",
         "status": "sent"
       }
     ]
