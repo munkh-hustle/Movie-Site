@@ -14,7 +14,8 @@
     "category": "bl",
     "file_id": "BAACAgUAAxkBAAIItWft45s8TDk2xAVN2KPvsG5Yv9xoAAKzFAACoF7gVt6g5XQnifAlNgQ",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:01Z"
+    "date_added": "2023-05-15T12:00:01Z",
+    "price": 1000
   },
   "secret-relationship-1-2": {
     "title": "secret-relationship-1-2",
@@ -31,7 +32,8 @@
     "category": "bl",
     "file_id": "BAACAgUAAxkBAAIIvWft5JNZxSWbPPiJRGvTQF06WgABbAACuRQAAqBe4FaC6hlYu0ijPzYE",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:02Z"
+    "date_added": "2023-05-15T12:00:02Z",
+    "price": 1000
   },
   "secret-relationship-1-3": {
     "title": "secret-relationship-1-3",
@@ -48,7 +50,8 @@
     "category": "bl",
     "file_id": "BAACAgUAAxkBAAIIw2ft5Ml0kcQFBmIaspkoEXiNzWRTAALBFAACoF7gVvDiEidpDRxuNgQ",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:03Z"
+    "date_added": "2023-05-15T12:00:03Z",
+    "price": 1000
   },
   "secret-relationship-1-4": {
     "title": "secret-relationship-1-4",
@@ -65,7 +68,8 @@
     "category": "bl",
     "file_id": "BAACAgUAAxkBAAIIx2ft5PCMU4G2qVGaS4yDYSLJXSICAALrFAACoF7gVoI-BPaOl9DhNgQ",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:04Z"
+    "date_added": "2023-05-15T12:00:04Z",
+    "price": 1000
   },
   "secret-relationship-1-5": {
     "title": "secret-relationship-1-5",
@@ -82,7 +86,8 @@
     "category": "bl",
     "file_id": "BAACAgUAAxkBAAIIzWft5SbzE33CAAEvKvFDOtYHDr7h7wACwBEAAqBe6FaRtE8GKz_DUzYE",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:05Z"
+    "date_added": "2023-05-15T12:00:05Z",
+    "price": 1000
   },
   "secret-relationship-1-6": {
     "title": "secret-relationship-1-6",
@@ -99,7 +104,8 @@
     "category": "bl",
     "file_id": "BAACAgUAAxkBAAII0Wft5U9wleSBiuthRFYqx3waPj1BAALOEQACoF7oVqiyrZAaSCRUNgQ",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:06Z"
+    "date_added": "2023-05-15T12:00:06Z",
+    "price": 1000
   },
   "secret-relationship-1-7": {
     "title": "secret-relationship-1-7",
@@ -116,7 +122,8 @@
     "category": "bl",
     "file_id": "BAACAgUAAxkBAAII1Wft5WO1zTkBiAABU4K3uEGCTh440wACGBMAAqBe6FZiWQmUFsdZOTYE",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:07Z"
+    "date_added": "2023-05-15T12:00:07Z",
+    "price": 1000
   },
   "secret-relationship-1-8": {
     "title": "secret-relationship-1-8",
@@ -133,7 +140,8 @@
     "category": "bl",
     "file_id": "BAACAgUAAxkBAAII2Wft5XVst79Qq0cm5VbZTehDqsFfAAIjEwACoF7oVqu4M4PZQWJwNgQ",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:08Z"
+    "date_added": "2023-05-15T12:00:08Z",
+    "price": 1000
   },
   "time-out-2015": {
     "title": "time-out-2015",
@@ -150,7 +158,8 @@
     "category": "bl",
     "file_id": "BAACAgUAAxkBAAII3Wft5lVuYY53aOae20ks74dwq0GeAAK9EQACoF7oVmUbuOcJZKtfNgQ",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:09Z"
+    "date_added": "2023-05-15T12:00:09Z",
+    "price": 1000
   },
   "red-white-and-royal-blue-2023": {
     "title": "red-white-and-royal-blue-2023",
@@ -167,7 +176,8 @@
     "category": "bl",
     "file_id": "BAACAgUAAxkBAAII42ft5p2IhQ9LWBrsxpw_Gb_k4mZPAAIsEwACoF7wVvauBJZ0s9bmNgQ",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:10Z"
+    "date_added": "2023-05-15T12:00:10Z",
+    "price": 1000
   },
   "pluto-1-1": {
     "title": "pluto-1-1",
@@ -184,7 +194,8 @@
     "category": "gl",
     "file_id": "BAACAgUAAxkBAAII52ft5tSALkHpHpm2sRFGKKOIqPhZAALYEwACG3fxVlQ75GA29LaWNgQ",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:11Z"
+    "date_added": "2023-05-15T12:00:11Z",
+    "price": 1000
   },
   "pluto-1-2": {
     "title": "pluto-1-2",
@@ -201,7 +212,8 @@
     "category": "gl",
     "file_id": "BAACAgUAAxkBAAII6Wft5tdEakN3tjh974DGhHQGXa4GAALaEwACG3fxVqMQ8f0xyTKwNgQ",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:12Z"
+    "date_added": "2023-05-15T12:00:12Z",
+    "price": 1000
   },
   "brokeback-mountain-2005": {
     "title": "brokeback-mountain-2005",
@@ -218,7 +230,8 @@
     "category": "bl",
     "file_id": "BAACAgUAAxkBAAII62ft5t3S2BkI-F1gezDLBeicLUgmAAJEEwACG3fxVq_IFLTJjC9UNgQ",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:13Z"
+    "date_added": "2023-05-15T12:00:13Z",
+    "price": 1000
   },
   "pluto-1-3": {
     "title": "pluto-1-3",
@@ -235,7 +248,8 @@
     "category": "gl",
     "file_id": "BAACAgUAAxkBAAII82ft5zL-UmXf-sgP0QhqZqfM20uNAALiEwACG3fxVh8ypspc7f1hNgQ",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:14Z"
+    "date_added": "2023-05-15T12:00:14Z",
+    "price": 1000
   },
   "monster-2023": {
     "title": "monster-2023",
@@ -252,7 +266,8 @@
     "category": "bl",
     "file_id": "BAACAgUAAxkBAAII9Wft5zUK7N6q687jgcx9XheKX3WsAAKrEgACD134VogIWn-vMT68NgQ",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:15Z"
+    "date_added": "2023-05-15T12:00:15Z",
+    "price": 1000
   },
   "pluto-1-4": {
     "title": "pluto-1-4",
@@ -269,7 +284,8 @@
     "category": "gl",
     "file_id": "BAACAgUAAxkBAAII92ft5zg-FCSoe0QkpT-X8VchwvWvAALsEwACG3fxVvSW99G13k3mNgQ",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:16Z"
+    "date_added": "2023-05-15T12:00:16Z",
+    "price": 1000
   },
   "bl-queer-as-folk-1-1": {
     "title": "bl-queer-as-folk-1-1",
@@ -286,7 +302,8 @@
     "category": "bl",
     "file_id": "BAACAgUAAxkBAAII-Wft5zuU55ornYHKQpsMyap24OYGAAI1EgACD10AAVeBBKcZINMvrjYE",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:17Z"
+    "date_added": "2023-05-15T12:00:17Z",
+    "price": 1000
   },
   "bros-2xxx": {
     "title": "bros-2xxx",
@@ -303,7 +320,8 @@
     "category": "bl",
     "file_id": "BAACAgUAAxkBAAII-2ft5z_futJCBlrszN7qKCuyHPdFAALqEgACD134VoRINL2jFIYZNgQ",
     "trailer_ids": [],
-    "date_added": "2023-05-15T12:00:18Z"
+    "date_added": "2023-05-15T12:00:18Z",
+    "price": 1000
   },
   "Test-11": {
     "title": "Test-11",
@@ -337,7 +355,8 @@
     "category": "animelex",
     "file_id": "BAACAgUAAxkBAAIJtWfz0Iub0P-b5VjYvGsT-9H3aE1gAAJLFQAC1DmZVzQfO48XAVUUNgQ",
     "trailer_ids": [],
-    "date_added": "2025-04-07T21:18:29.255493"
+    "date_added": "2025-04-07T21:18:29.255493",
+    "price": 500
   },
   "sakamoto-days-1-2": {
     "title": "sakamoto-days-1-2",
@@ -354,7 +373,8 @@
     "category": "animelex",
     "file_id": "BAACAgUAAxkBAAIJuWfz0K1ZnsM0PYqjaYzEtfkwsfpWAAJMFQAC1DmZV_YdAtizZUM5NgQ",
     "trailer_ids": [],
-    "date_added": "2025-04-07T21:18:43.080219"
+    "date_added": "2025-04-07T21:18:43.080219",
+    "price": 500
   },
   "sakamoto-days-1-3": {
     "title": "sakamoto-days-1-3",
@@ -371,7 +391,8 @@
     "category": "animelex",
     "file_id": "BAACAgUAAxkBAAIJvWfz0NUUCW7sgl6wSeH6pYvgdc3VAAJcEgACb0SgV0FZCQKCOrO9NgQ",
     "trailer_ids": [],
-    "date_added": "2025-04-07T21:19:25.169282"
+    "date_added": "2025-04-07T21:19:25.169282",
+    "price": 500
   },
   "sakamoto-days-1-4": {
     "title": "sakamoto-days-1-4",
@@ -388,7 +409,8 @@
     "category": "animelex",
     "file_id": "BAACAgUAAxkBAAIJwWfz0OfAreE9WWcWvx9R2uIqQDWiAAJdEgACb0SgVzRJYeO5YhQqNgQ",
     "trailer_ids": [],
-    "date_added": "2025-04-07T21:19:41.756886"
+    "date_added": "2025-04-07T21:19:41.756886",
+    "price": 500
   },
   "sakamoto-days-1-5": {
     "title": "sakamoto-days-1-5",
@@ -405,7 +427,8 @@
     "category": "animelex",
     "file_id": "BAACAgUAAxkBAAIJxmfz0QABgL-GcgKfnbv3Rn5Rx3k9_AACXxIAAm9EoFdS9DRlXZ8o_jYE",
     "trailer_ids": [],
-    "date_added": "2025-04-07T21:20:09.998964"
+    "date_added": "2025-04-07T21:20:09.998964",
+    "price": 500
   },
   "sakamoto-days-1-6": {
     "title": "sakamoto-days-1-6",
@@ -422,7 +445,8 @@
     "category": "animelex",
     "file_id": "BAACAgUAAxkBAAIJy2fz0RABzdYJIFCigIVZjkRu1JOgAAJgEgACb0SgV7M_d138DiAeNgQ",
     "trailer_ids": [],
-    "date_added": "2025-04-07T21:20:24.131320"
+    "date_added": "2025-04-07T21:20:24.131320",
+    "price": 500
   },
   "sakamoto-days-1-7": {
     "title": "sakamoto-days-1-7",
@@ -439,7 +463,8 @@
     "category": "animelex",
     "file_id": "BAACAgUAAxkBAAIJz2fz0SUlpLBVL8sh2LcHhrRM0-OiAAJhEgACb0SgV7ZKuNtxKFZaNgQ",
     "trailer_ids": [],
-    "date_added": "2025-04-07T21:20:43.605809"
+    "date_added": "2025-04-07T21:20:43.605809",
+    "price": 500
   },
   "sakamoto-days-1-8": {
     "title": "sakamoto-days-1-8",
@@ -456,7 +481,8 @@
     "category": "animelex",
     "file_id": "BAACAgUAAxkBAAIJ02fz0TM3c8M7QrkCPP18u_SZN6dNAAJiEgACb0SgV3oOz4IwkMj5NgQ",
     "trailer_ids": [],
-    "date_added": "2025-04-07T21:20:59.345698"
+    "date_added": "2025-04-07T21:20:59.345698",
+    "price": 500
   },
   "sakamoto-days-1-9": {
     "title": "sakamoto-days-1-9",
@@ -473,7 +499,8 @@
     "category": "animelex",
     "file_id": "BAACAgUAAxkBAAIJ12fz0UJO48eoBZzKMFf_sAeSqCmyAAJkEgACb0SgV3rbg2lgu1VENgQ",
     "trailer_ids": [],
-    "date_added": "2025-04-07T21:21:13.552609"
+    "date_added": "2025-04-07T21:21:13.552609",
+    "price": 500
   },
   "sakamoto-days-1-10": {
     "title": "sakamoto-days-1-10",
@@ -490,7 +517,8 @@
     "category": "animelex",
     "file_id": "BAACAgUAAxkBAAIJ22fz0VEKt0YUNDPz6bayvRvE9THQAAJmEgACb0SgV39PxAVOASrENgQ",
     "trailer_ids": [],
-    "date_added": "2025-04-07T21:21:27.740455"
+    "date_added": "2025-04-07T21:21:27.740455",
+    "price": 500
   },
   "sakamoto-days-1-11": {
     "title": "sakamoto-days-1-11",
@@ -507,6 +535,7 @@
     "category": "animelex",
     "file_id": "BAACAgUAAxkBAAIJ32fz0V1_ET-aSRpmhIGnypIcSe8dAAJnEgACb0SgV0gn8XSQMK_NNgQ",
     "trailer_ids": [],
-    "date_added": "2025-04-07T21:21:40.234192"
+    "date_added": "2025-04-07T21:21:40.234192",
+    "price": 500
   }
 }
