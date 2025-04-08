@@ -19,6 +19,10 @@
       {
         "video_name": "sakamoto-days-1-11",
         "timestamp": "2025-04-08T00:42:15.149194"
+      },
+      {
+        "video_name": "sakamoto-days-1-11",
+        "timestamp": "2025-04-08T12:49:17.667922"
       }
     ],
     "chat_log": [
@@ -98,6 +102,11 @@
       },
       {
         "timestamp": "2025-04-08T00:42:15.913227",
+        "video_name": "sakamoto-days-1-11",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-08T12:49:18.159152",
         "video_name": "sakamoto-days-1-11",
         "status": "sent"
       }
