@@ -549,37 +549,6 @@ async def update_metadata(update: Update, context: CallbackContext) -> None:
         f"✅ Updated {field} for '{video_name}':\n\n{value}"
     )
 
-async def user_limits(update: Update, context: CallbackContext) -> None:
-    """View or set user limits (admin only)"""
-    if not is_admin(update):
-        await update.message.reply_text("Зөвхөн админ болно.")
-        return
-    
-    if len(context.args) >= 2:
-        # Setting a new limit
-        try:
-            user_id = int(context.args[0])
-            new_limit = int(context.args[1])
-            
-            set_user_video_limit(user_id, new_limit)
-            await update.message.reply_text(
-                f"✅ {user_id} дугаартай хэрэглэгч таныг {new_limit} өөр кино үзэхээр сунгалаа. {LINK}"
-            )
-        except ValueError:
-            await update.message.reply_text("Хэрэглээ: /userlimit <user_id> <limit>")
-    else:
-        # Viewing limits
-        limits = load_user_limits()
-        if not limits:
-            await update.message.reply_text("No custom limits set.")
-            return
-            
-        message = ["📊 Custom User Limits:"]
-        for user_id, limit in limits.items():
-            message.append(f"\n👤 User ID: {user_id} - Limit: {limit} videos")
-        
-        await update.message.reply_text('\n'.join(message))
-
 async def notify_admin_payment_submission(context: CallbackContext, user, file_path):
     """Notify admin about new payment submission"""
     keyboard = [
@@ -655,25 +624,6 @@ async def handle_screenshot(update: Update, context: CallbackContext) -> None:
         await update.message.reply_text(
             "❌ Error processing your screenshot. Please try again."
         )
-
-async def reset_user(update: Update, context: CallbackContext) -> None:
-    """Reset a user's video count (admin only)"""
-    if not is_admin(update):
-        await update.message.reply_text("Зөвхөн админ.")
-        return
-    
-    if not context.args:
-        await update.message.reply_text("Usage: /resetuser <user_id>")
-        return
-    
-    try:
-        user_id = int(context.args[0])
-        if reset_user_video_count(user_id):
-            await update.message.reply_text(f"User {user_id}'s video count has been reset.")
-        else:
-            await update.message.reply_text(f"User {user_id} not found or already has no videos.")
-    except ValueError:
-        await update.message.reply_text("Invalid user ID. Must be a number.")
 
 async def send_video_with_limit_check(update: Update, context: CallbackContext, user, video_name):
     """Handle video sending with balance checks"""
@@ -1624,17 +1574,14 @@ def main() -> None:
     application.add_handler(CommandHandler("stats", user_stats))
     application.add_handler(CommandHandler("blocked", blocked_users))
     application.add_handler(CommandHandler("unblock", unblock_command))
-    application.add_handler(CommandHandler("resetuser", reset_user))
     application.add_handler(CommandHandler("videologs", video_logs))
     application.add_handler(CommandHandler("verifypayment", verify_payment))
-    application.add_handler(CommandHandler("userlimit", user_limits))
     application.add_handler(CommandHandler("updatemeta", update_metadata))
     application.add_handler(CommandHandler("sendmessage", send_message_to_user))
     application.add_handler(CommandHandler("schedulebroadcast", schedule_broadcast))
     application.add_handler(CommandHandler("sendvideo", send_video_to_user))
     application.add_handler(CommandHandler("addtrailer", addtrailer))
-
-
+    
     # Handle button presses
     application.add_handler(CallbackQueryHandler(button))
     
