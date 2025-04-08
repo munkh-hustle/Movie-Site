@@ -38,9 +38,11 @@ USER_LIMITS_FILE = 'db/user_limits.json'
 MOVIE_DETAILS = 'movie-details.json'
 PAYMENT_SUBMISSION = 'db/payment_submissions.json'
 LINK = 'Test.com'
+USER_BALANCES_FILE = 'db/user_balances.json'
 
 # Dictionary to store video IDs and names
 video_db = {}
+
 def load_video_db():
     """Load video database from movie-details.json file"""
     global video_db
@@ -55,11 +57,45 @@ def load_video_db():
         with open(MOVIE_DETAILS, 'w', encoding='utf-8') as f:
             json.dump({}, f, indent=2)
 
-def save_video_db():
-    """This function is kept for backward compatibility but won't do anything"""
-    pass
-
 load_video_db()
+
+def load_user_balances():
+    """Load user balances from JSON file"""
+    try:
+        with open(USER_BALANCES_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+def save_user_balances(balances):
+    """Save user balances to JSON file"""
+    with open(USER_BALANCES_FILE, 'w', encoding='utf-8') as f:
+        json.dump(balances, f, indent=2)
+
+def get_user_balance(user_id):
+    """Get a user's current balance"""
+    balances = load_user_balances()
+    return balances.get(str(user_id), 0)
+
+def deduct_user_balance(user_id, amount):
+    """Deduct from user's balance"""
+    balances = load_user_balances()
+    user_id_str = str(user_id)
+    current_balance = balances.get(user_id_str, 0)
+    if current_balance >= amount:
+        balances[user_id_str] = current_balance - amount
+        save_user_balances(balances)
+        return True
+    return False
+
+def add_user_balance(user_id, amount):
+    """Add to user's balance"""
+    balances = load_user_balances()
+    user_id_str = str(user_id)
+    current_balance = balances.get(user_id_str, 0)
+    balances[user_id_str] = current_balance + amount
+    save_user_balances(balances)
+
 
 def load_user_limits():
     """Load user video limits from JSON file"""
@@ -318,6 +354,18 @@ def log_user_photo(user_id, username, first_name, photo_file_id, caption=None):
     })
     
     save_user_activity(activity_data)
+
+async def balance(update: Update, context: CallbackContext) -> None:
+    """Check user balance"""
+    user = update.effective_user
+    balance = get_user_balance(user.id)
+    
+    await update.message.reply_text(
+        f"Таны үлдэгдэл: {balance}\n\n"
+        "Цэнэглэх: Хаан банк О.МӨНХ-ЭРДЭНЭ 5926271236\n"
+        "Гүйлгээний утга: утасны дугаар\n"
+        "Шилжүүлснийхээ дараа төлбөр төлсөн дэлгэцийн зургаа дарж ийшээ явуулна уу."
+    )
 
 async def _send_broadcast(context: CallbackContext):
     job = context.job
@@ -628,76 +676,75 @@ async def reset_user(update: Update, context: CallbackContext) -> None:
         await update.message.reply_text("Invalid user ID. Must be a number.")
 
 async def send_video_with_limit_check(update: Update, context: CallbackContext, user, video_name):
-    """Handle video sending with limit checks"""
-    # First check if user is blocked
-    if is_user_blocked(user.id):  # This stays the same
-        blocked_users = load_blocked_users()
-        user_data = blocked_users.get(str(user.id), {})
-        if not user_data.get('unblocked'):
-            await context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text="Таны үзэх эрх дууссан байна. Хэрвээ төлбөр шилжүүлсэн бол админ мэдээлэл өгтөл түр хүлээнэ үү."
-            )
-            return False
-    
-    # Record the activity first
-    record_user_activity(
-        user.id,
-        user.username,
-        user.first_name,
-        user.last_name,
-        video_name
-    )
-    
-    # Check if user reached limit (using their custom limit if set)
-    user_limit = get_user_video_limit(user.id)
-    activity_data = load_user_activity()
-    user_videos = activity_data.get(str(user.id), {}).get('videos', [])
-    unique_videos = len({v['video_name'] for v in user_videos})
-    
-    if unique_videos >= user_limit:
-        # Send the video first (with protect_content)
-        await context.bot.send_video(
+    """Handle video sending with balance checks"""
+    # Get video price
+    video_data = load_video_data()
+    if video_name not in video_data:
+        await context.bot.send_message(
             chat_id=update.effective_chat.id,
-            video=video_db[video_name],
-            protect_content=True,
-            caption="Таны үзэхгийг хүссэн кино. Энэ байна."
+            text="Кино олдсонгүй."
         )
-        log_sent_video(user.id, video_name)
+        return False
+    
+    video_price = video_data[video_name].get('price', 0)
+    user_balance = get_user_balance(user.id)
 
-        # Then block them and send payment instructions
-        block_user(user.id, user.username, user.first_name)
-        payment_message = (
-            f"⚠️ Таны үзэх эрх дууссан байна.\n\n"
+     # Check if user has enough balance
+    if user_balance < video_price:
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=f"Таны үлдэгдэл хүрэлцэхгүй байна. Киноны үнэ: {video_price}, Таны үлдэгдэл: {user_balance}\n\n"
             "Үргэлжлүүлэн үзэхийг хүсвэл хэдэн кино үзмээр байна:\n"
             "Тэр тоогоороо төлбөр төлнө үү:\n\n"
             "1 кино = 1500 төгрөг (Movielex)\n"
             "1 кино = 1000 төгрөг (Seriallex)\n"
             "1 аниме = 500 төгрөг (Animelex)\n\n"
-            "Данс 🏦 Хаан банк: 5926271236\n\n"
-            f"Гүйлгээний утга: өөрийнхөө утасны дугаар\n"
+            "Данс 🏦 Хаан банк: О.МӨНХ-ЭРДЭНЭ 5926271236\n\n"
+            "Гүйлгээний утга: өөрийнхөө утасны дугаар\n"
             "Шилжүүлснийхээ дараа төлбөр төлсөн дэлгэцийн зургаа дарж ийшээ явуулна уу.\n"
             "Зураг явуулахгүй бол 7 хоног болохыг анхаарна уу.\n"
             "Хэрвээ зураг явуулсан бол 1 хоногийн дотор баталгаажих болноо. Та түр хүлээнэ үү🫡🤗\n"
         )
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=payment_message
-        )
-
-        await notify_admin_limit_reached(context, user)
         return False
     
-    # Send video if under limit (with protected content)
-    await context.bot.send_video(
-        chat_id=update.effective_chat.id,
-        video=video_db[video_name],
-        protect_content=True,
-        caption="Таны үзэхгийг хүссэн кино. Энэ байна."
-    )
-    log_sent_video(user.id, video_name)
-    return True
-
+    # Deduct balance
+    if not deduct_user_balance(user.id, video_price):
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="Алдаа гарлаа. Төлбөр хасагдаагүй байна."
+        )
+        return False
+    
+    # Send the video
+    try:
+        await context.bot.send_video(
+            chat_id=update.effective_chat.id,
+            video=video_db[video_name],
+            protect_content=True,
+            caption=f"Таны үзэхгийг хүссэн кино энэ байна. Үлдэгдэл: {get_user_balance(user.id)}"
+        )
+        log_sent_video(user.id, video_name)
+        
+        # Record the transaction
+        record_user_activity(
+            user.id,
+            user.username,
+            user.first_name,
+            user.last_name,
+            video_name
+        )
+        
+        return True
+    except Exception as e:
+        # Refund if sending failed
+        add_user_balance(user.id, video_price)
+        logger.error(f"Error sending video: {e}")
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="Кино илгээхэд алдаа гарлаа. Төлбөр буцаагдлаа."
+        )
+        return False
+    
 async def notify_admin_limit_reached(context: CallbackContext, user):
     """Notify admin when a user reaches the limit"""
     keyboard = [
@@ -750,37 +797,33 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
     message = update.effective_message
     
     # Check if admin is setting a limit for a user
-    if is_admin(update) and 'awaiting_limit' in context.user_data:
+    if is_admin(update) and 'awaiting_payment_approval' in context.user_data:
         try:
-            new_limit = int(message.text)
-            user_id = context.user_data['awaiting_limit']
+            amount = int(message.text)
+            user_id = context.user_data['awaiting_payment_approval']
             
-            # Update payment status (again in case it wasn't saved)
+            # Add balance
+            add_user_balance(user_id, amount)
+            
+            # Update payment status
             update_payment_status(user_id, 'approved')
-
-            # Unblock user
-            unblock_user(user_id)
-            reset_user_video_count(user_id)
             
-            # Store the custom limit
-            set_user_video_limit(user_id, new_limit)
-
             await update.message.reply_text(
-                f"✅ User {user_id} approved with new limit: {new_limit} videos."
+                f"✅ {amount} added to user {user_id}'s balance. New balance: {get_user_balance(user_id)}"
             )
             
-            # Notify the user
+            # Notify user
             await context.bot.send_message(
                 chat_id=user_id,
-                text=f"🎉 Таны хүсэлт баталгаажлаа! Та одоо {new_limit} удаа кино үзэх эрхтэй боллоо.{LINK}"
+                text=f"🎉 Таны төлбөр баталгаажлаа! Таны дансанд {amount} нэмэгдлээ. Нийт үлдэгдэл: {get_user_balance(user_id)}\n\n{LINK}"
             )
             
             # Clear the awaiting state
-            del context.user_data['awaiting_limit']
+            del context.user_data['awaiting_payment_approval']
             return
             
         except ValueError:
-            await update.message.reply_text("Please enter a valid number for the limit.")
+            await update.message.reply_text("Please enter a valid number for the amount.")
             return
     
     # Existing message logging functionality
@@ -906,11 +949,17 @@ async def addvideo(update: Update, context: CallbackContext) -> None:
         return
     
     if not context.args:
-        await update.message.reply_text("Usage: /addvideo <name> (reply to a video)")
+        await update.message.reply_text("Usage: /addvideo <name> <price> (reply to a video)")
         return
     
     if update.message.reply_to_message and update.message.reply_to_message.video:
-        video_name = ' '.join(context.args)
+        try:
+            video_name = ' '.join(context.args[:-1])
+            price = int(context.args[-1])
+        except (IndexError, ValueError):
+            await update.message.reply_text("Please specify a valid price as the last argument")
+            return
+        
         video_file_id = update.message.reply_to_message.video.file_id
         
         # Load existing data
@@ -933,11 +982,13 @@ async def addvideo(update: Update, context: CallbackContext) -> None:
                 "category": "other",
                 "file_id": video_file_id,
                 "trailer_ids": [],
-                "date_added": datetime.now().isoformat()
+                "date_added": datetime.now().isoformat(),
+                "price": price
             }
         else:
             # Just update the file_id if video exists
             video_data[video_name]['file_id'] = video_file_id
+            video_data[video_name]['price'] = price
 
         # Save the updated data
         save_video_data(video_data)
@@ -945,7 +996,7 @@ async def addvideo(update: Update, context: CallbackContext) -> None:
         # Update the video_db mapping
         video_db[video_name] = video_file_id
 
-        await update.message.reply_text(f"Video '{video_name}' added successfully!")
+        await update.message.reply_text(f"Video '{video_name}' added successfully with price {price}!")
     else:
         await update.message.reply_text("Please reply to a video message with this command.")
 
@@ -1209,36 +1260,30 @@ async def button(update: Update, context: CallbackContext) -> None:
             user_id = int(query.data[8:])
             if is_admin(update):
                 try:
-                    # Update payment status
-                    update_payment_status(user_id, 'approved')
-
-                    # Unblock user
-                    unblock_user(user_id)
-                    reset_user_video_count(user_id)
-
-                    # Store user_id in context to use in the next message
-                    context.user_data['awaiting_limit'] = user_id
-
+                    # Ask admin for amount to add
+                    context.user_data['awaiting_payment_approval'] = user_id
+                    
+                    await query.edit_message_text(
+                        text=f"✅ Payment from user ID {user_id} approved.\n"
+                             "Please send the amount to add to their balance (e.g., '5000')."
+                    )
+                    
+                except Exception as e:
+                    logger.error(f"Error approving payment: {e}")
                     try:
-                        # Try to edit the original message
                         await query.edit_message_text(
-                            text=f"✅ Payment from user ID {user_id} approved.\n"
-                                 "Please send the new video limit for this user (e.g., '10')."
+                            text=f"❌ Error approving payment: {str(e)}"
                         )
-                    except Exception as edit_error:
-                        # If editing fails, send a new message
-                        logger.error(f"Error editing approval message: {edit_error}")
+                    except:
                         await context.bot.send_message(
                             chat_id=ADMIN_ID,
-                            text=f"✅ Payment from user ID {user_id} approved.\n"
-                                 "Please send the new video limit for this user (e.g., '10')."
+                            text=f"❌ Error approving payment: {str(e)}"
                         )
-
 
                     # Notify user
                     await context.bot.send_message(
                         chat_id=user_id,
-                        text="🎉 Таны хүсэлт баталгаажлаа."
+                        text="🎉 Таны төлбөр баталгаажлаа."
                     )
 
                 except Exception as e:
