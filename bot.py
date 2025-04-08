@@ -37,7 +37,7 @@ MAX_VIDEOS_BEFORE_BLOCK = 5
 USER_LIMITS_FILE = 'db/user_limits.json'
 MOVIE_DETAILS = 'movie-details.json'
 PAYMENT_SUBMISSION = 'db/payment_submissions.json'
-LINK = ''
+LINK = 'Test.com'
 
 # Dictionary to store video IDs and names
 video_db = {}
@@ -668,15 +668,16 @@ async def send_video_with_limit_check(update: Update, context: CallbackContext, 
         # Then block them and send payment instructions
         block_user(user.id, user.username, user.first_name)
         payment_message = (
-            f"⚠️ Та {user_limit} удаа үзэх эрх дууссан байна.\n\n"
+            f"⚠️ Таны үзэх эрх дууссан байна.\n\n"
             "Үргэлжлүүлэн үзэхийг хүсвэл хэдэн кино үзмээр байна:\n"
-            "Тэр тоогоороо төлбөр төлнө үү:\n"
-            "1 кино = 1000 төгрөг:\n"
-            "🏦 Хаан банк: 5926271236\n\n"
-            "Гүйлгээний утга өөрийнхөө утасны дугаар бичнэ:\n"
+            "Тэр тоогоороо төлбөр төлнө үү:\n\n"
+            "1 кино = 1500 төгрөг\n"
+            "1 аниме = 500 төгрөг\n\n"
+            "Данс 🏦 Хаан банк: 5926271236\n\n"
+            f"Гүйлгээний утга: өөрийнхөө утасны дугаар\n"
             "Шилжүүлснийхээ дараа төлбөр төлсөн дэлгэцийн зургаа дарж ийшээ явуулна уу.\n"
-            "Админ шалгаж үзээд баталгаажуулах болно. 1 хоногийн дотор хийх болно\n"
-            f"{user.id}\n\n"
+            "Зураг явуулахгүй бол 7 хоног болохыг анхаарна уу.\n"
+            "Хэрвээ зураг явуулсан бол 1 хоногийн дотор баталгаажих болноо. Та түр хүлээнэ үү🫡🤗\n"
         )
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
@@ -708,7 +709,7 @@ async def notify_admin_limit_reached(context: CallbackContext, user):
         await context.bot.send_message(
             chat_id=ADMIN_ID,
             text=f"🚨 User @{user.username or user.first_name} (ID: {user.id}) "
-                 f"has reached the 5 video limit.\n\n"
+                 f"has reached video limit.\n\n"
                  f"Please wait for their payment screenshot or manually verify.\n"
                  f"Username: @{user.username}\n"
                  f"First Name: {user.first_name}\n"
