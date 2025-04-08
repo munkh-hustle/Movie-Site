@@ -34,7 +34,6 @@ USER_ACTIVITY_FILE = 'db/user_activity.json'
 BLOCKED_USERS_FILE = 'db/blocked_users.json'
 MAX_VIDEOS_BEFORE_BLOCK = 5
 
-USER_LIMITS_FILE = 'db/user_limits.json'
 MOVIE_DETAILS = 'movie-details.json'
 PAYMENT_SUBMISSION = 'db/payment_submissions.json'
 LINK = 'Test.com'
@@ -95,31 +94,6 @@ def add_user_balance(user_id, amount):
     current_balance = balances.get(user_id_str, 0)
     balances[user_id_str] = current_balance + amount
     save_user_balances(balances)
-
-
-def load_user_limits():
-    """Load user video limits from JSON file"""
-    try:
-        with open(USER_LIMITS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return {}
-
-def save_user_limits(limits):
-    """Save user video limits to JSON file"""
-    with open(USER_LIMITS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(limits, f, indent=2)
-
-def set_user_video_limit(user_id, limit):
-    """Set a custom video limit for a user"""
-    limits = load_user_limits()
-    limits[str(user_id)] = limit
-    save_user_limits(limits)
-
-def get_user_video_limit(user_id):
-    """Get a user's video limit (defaults to MAX_VIDEOS_BEFORE_BLOCK if not set)"""
-    limits = load_user_limits()
-    return limits.get(str(user_id), MAX_VIDEOS_BEFORE_BLOCK)
 
 def load_user_activity():
     """Load user activity data from file"""
@@ -354,6 +328,50 @@ def log_user_photo(user_id, username, first_name, photo_file_id, caption=None):
     })
     
     save_user_activity(activity_data)
+
+async def user_photos(update: Update, context: CallbackContext) -> None:
+    """Show photos sent by a specific user (admin only)"""
+    if not is_admin(update):
+        await update.message.reply_text("Зөвхөн админ.")
+        return
+    
+    if not context.args:
+        await update.message.reply_text("Usage: /userphotos <user_id>")
+        return
+    
+    try:
+        user_id = int(context.args[0])
+        activity_data = load_user_activity()
+        user_id_str = str(user_id)
+        
+        if user_id_str not in activity_data:
+            await update.message.reply_text(f"User {user_id} not found in activity logs.")
+            return
+        
+        photo_logs = activity_data[user_id_str].get('photo_logs', [])
+        if not photo_logs:
+            await update.message.reply_text(f"No photos found for user {user_id}.")
+            return
+        
+        await update.message.reply_text(f"📸 Photos sent by user {user_id}:")
+        
+        for photo_log in photo_logs:
+            try:
+                await context.bot.send_photo(
+                    chat_id=update.effective_chat.id,
+                    photo=photo_log['photo_file_id'],
+                    caption=f"Timestamp: {photo_log['timestamp']}\nCaption: {photo_log.get('caption', 'None')}"
+                )
+                await asyncio.sleep(1)  # Small delay to avoid rate limits
+            except Exception as e:
+                logger.error(f"Error sending photo: {e}")
+                await update.message.reply_text(f"Failed to send one of the photos. Error: {str(e)}")
+        
+    except ValueError:
+        await update.message.reply_text("Invalid user ID. Must be a number.")
+    except Exception as e:
+        logger.error(f"Error in user_photos: {e}")
+        await update.message.reply_text(f"An error occurred: {str(e)}")
 
 async def balance(update: Update, context: CallbackContext) -> None:
     """Check user balance"""
@@ -1581,7 +1599,8 @@ def main() -> None:
     application.add_handler(CommandHandler("schedulebroadcast", schedule_broadcast))
     application.add_handler(CommandHandler("sendvideo", send_video_to_user))
     application.add_handler(CommandHandler("addtrailer", addtrailer))
-    
+    application.add_handler(CommandHandler("userphotos", user_photos))
+
     # Handle button presses
     application.add_handler(CallbackQueryHandler(button))
     
