@@ -37,6 +37,7 @@ MAX_VIDEOS_BEFORE_BLOCK = 5
 USER_LIMITS_FILE = 'db/user_limits.json'
 MOVIE_DETAILS = 'movie-details.json'
 PAYMENT_SUBMISSION = 'db/payment_submissions.json'
+LINK = ''
 
 # Dictionary to store video IDs and names
 video_db = {}
@@ -514,7 +515,7 @@ async def user_limits(update: Update, context: CallbackContext) -> None:
             
             set_user_video_limit(user_id, new_limit)
             await update.message.reply_text(
-                f"✅ {user_id} дугаартай хэрэглэгч таныг {new_limit} удаа өөр кино үзэхээр сунгалаа."
+                f"✅ {user_id} дугаартай хэрэглэгч таныг {new_limit} өөр кино үзэхээр сунгалаа. {LINK}"
             )
         except ValueError:
             await update.message.reply_text("Хэрэглээ: /userlimit <user_id> <limit>")
@@ -734,7 +735,7 @@ async def unblock_command(update: Update, context: CallbackContext) -> None:
             # Notify the user
             await context.bot.send_message(
                 chat_id=user_id,
-                text="🎉Таны зөвшөөрсөн байна. www.kino.com киногоо үргэлжлүүлэн үзнэ үү"
+                text=f"🎉Таны зөвшөөрсөн байна. {LINK} киногоо үргэлжлүүлэн үзнэ үү"
             )
         else:
             await update.message.reply_text(f"User {user_id} wasn't blocked.")
@@ -769,7 +770,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
             # Notify the user
             await context.bot.send_message(
                 chat_id=user_id,
-                text=f"🎉 Таны хүсэлт баталгаажлаа! Та одоо {new_limit} удаа кино үзэх эрхтэй боллоо."
+                text=f"🎉 Таны хүсэлт баталгаажлаа! Та одоо {new_limit} удаа кино үзэх эрхтэй боллоо.{LINK}"
             )
             
             # Clear the awaiting state
@@ -798,7 +799,7 @@ async def start(update: Update, context: CallbackContext) -> None:
     if context.args and context.args[0].startswith('video_'):
         video_name = context.args[0][6:]
         if video_name in video_db:
-            await update.message.reply_text("Кино илгээж байна...")
+            await update.message.reply_text("Кино илгээж байна...хүлээнэ үү🫡")
             success = await send_video_with_limit_check(update, context, user, video_name)
             if not success:
                 return
@@ -807,16 +808,16 @@ async def start(update: Update, context: CallbackContext) -> None:
         video_data = load_video_data()
         
         if video_name not in video_data:
-            await update.message.reply_text("Кино олдсонгүй.")
+            await update.message.reply_text(f"Кино олдсонгүй ээ 😣😖😭😵‍💫 {LINK}")
             return
             
         trailers = video_data[video_name].get('trailer_ids', [])
         
         if not trailers:
-            await update.message.reply_text("Энэ кинонд трейлер олдсонгүй.")
+            await update.message.reply_text(f"Энэ кинонд трейлер олдсонгүй. 😣😖😭😵‍💫 {LINK}")
             return
             
-        await update.message.reply_text("Трейлерүүд илгээж байна...")
+        await update.message.reply_text("Трейлерүүд илгээж байна...хүлээнэ үү 🫡")
         
         # Send all trailers
         for trailer_id in trailers[:5]:  # Limit to 5 trailers
@@ -847,9 +848,9 @@ async def start(update: Update, context: CallbackContext) -> None:
 
             
     if video_name is not None:  # Only show this if we were actually looking for a video
-        await update.message.reply_text(f"Өшөө олон кино үзэх бол www.kino.com")
+        await update.message.reply_text(f"Өшөө олон кино үзэх бол {LINK}")
     else:
-        await update.message.reply_text(f'Сайн байна уу? {user.first_name}!. www.kino.mn руу орж киногоо сонгоно уу.')
+        await update.message.reply_text(f'Сайн байна уу? {user.first_name}!. {LINK} руу орж киногоо сонгоно уу.')
 
 async def blocked_users(update: Update, context: CallbackContext) -> None:
     """Show list of blocked users (admin only)"""
@@ -1479,14 +1480,14 @@ async def verify_payment(update: Update, context: CallbackContext) -> None:
             # Notify the user
             await context.bot.send_message(
                 chat_id=user_id,
-                text="🎉 Таны хүсэлт баталгаажлаа. Үргэлжлүүлэн www.kino.com үзэх боломжтой"
+                text=f"🎉 Таны хүсэлт баталгаажлаа. Үргэлжлүүлэн {LINK} үзэх боломжтой боллоо 😎😎😎"
             )
         else:
             await update.message.reply_text(f"❌ Payment from user {user_id} rejected.")
             # Notify the user
             await context.bot.send_message(
                 chat_id=user_id,
-                text="❌ Таны хүсэлт баталгаажсангүй. Алдаа гэж үзэж байвал админтай холбогдоно уу."
+                text="❌ Таны хүсэлт баталгаажсангүй. Алдаа гэж үзэж байвал Facebook: Meme Cinema паже хуудас руу холбогдоно уу.😖😭"
             )
             
     except ValueError:
