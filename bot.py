@@ -1147,7 +1147,7 @@ async def list_videos(update: Update, context: CallbackContext) -> None:
     keyboard = []
     for name, data in sorted(video_data.items()):
         # Show title_name if available, otherwise title
-        display_name = data.get('title_name', name)
+        display_name = data.get('title', name)
         keyboard.append([InlineKeyboardButton(display_name, callback_data=f"video_{name}")])
     
     reply_markup = InlineKeyboardMarkup(keyboard)
