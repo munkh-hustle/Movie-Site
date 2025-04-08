@@ -61,6 +61,41 @@ body {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+.site-header h1 a {
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+    position: relative;
+    display: inline-block;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, var(--accent), var(--light));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.site-header h1 a:hover {
+    transform: scale(1.02);
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Optional: Add a subtle underline effect on hover */
+.site-header h1 a::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--accent);
+    transition: width 0.3s ease;
+}
+
+.site-header h1 a:hover::after {
+    width: 100%;
+}
+
 .site-header nav ul {
     display: flex;
     list-style: none;
@@ -237,8 +272,8 @@ body {
     font-size: 1rem;
     background: rgba(255, 255, 255, 0.1);
     color: white;
-    backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
 }
