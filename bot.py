@@ -36,7 +36,7 @@ MAX_VIDEOS_BEFORE_BLOCK = 5
 
 MOVIE_DETAILS = 'movie-details.json'
 PAYMENT_SUBMISSION = 'db/payment_submissions.json'
-LINK = 'Test.com'
+LINK = 'https://munkh-hustle.github.io/Movie-Site/'
 USER_BALANCES_FILE = 'db/user_balances.json'
 
 # Dictionary to store video IDs and names
