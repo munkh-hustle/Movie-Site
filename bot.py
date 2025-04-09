@@ -1206,7 +1206,7 @@ async def button(update: Update, context: CallbackContext) -> None:
                     try:
                         await context.bot.send_message(
                             chat_id=user_id,
-                            text="🎉 Та үргэлжлүүлэн кино үзэх боломжтой боллоо. www.kino.com орно уу"
+                            text=f"🎉 Та үргэлжлүүлэн кино үзэх боломжтой боллоо. {LINK} орно уу"
                         )
                     except Exception as e:
                         logger.error(f"Error notifying unblocked user: {e}")
