@@ -32,7 +32,6 @@ ADMIN_ID = 7905267896
 USER_ACTIVITY_FILE = 'db/user_activity.json'
 BLOCKED_USERS_FILE = 'db/blocked_users.json'
 MOVIE_DETAILS = 'movie-details.json'
-PAYMENT_SUBMISSION = 'db/payment_submissions.json'
 LINK = 'https://munkh-hustle.github.io/Movie-Site/'
 USER_BALANCES_FILE = 'db/user_balances.json'
 
@@ -267,41 +266,6 @@ def log_sent_video(user_id, video_name):
     
     save_user_activity(activity_data)
 
-def update_payment_status(user_id, status):
-    """Update payment status in the database"""
-    try:
-        with open(PAYMENT_SUBMISSION, 'r+', encoding='utf-8') as f:
-            data = json.load(f)
-            
-        # Find most recent submission from this user
-        for submission in reversed(data):
-            if submission['user_id'] == user_id:
-                submission['status'] = status
-                submission['processed_at'] = datetime.now().isoformat()
-                break
-                
-        with open(PAYMENT_SUBMISSION, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2)
-            
-    except Exception as e:
-        logger.error(f"Error updating payment status: {e}")
-
-def save_payment_submission(payment_data):
-    """Save payment submission to JSON file"""
-    try:
-        with open(PAYMENT_SUBMISSION, 'r+', encoding='utf-8') as f:
-            try:
-                data = json.load(f)
-            except json.JSONDecodeError:
-                data = []
-    except FileNotFoundError:
-        data = []
-    
-    data.append(payment_data)
-    
-    with open(PAYMENT_SUBMISSION, 'w', encoding='utf-8') as f:
-        json.dump(data, f, indent=2)
-
 def log_user_photo(user_id, username, first_name, photo_file_id, caption=None):
     """Save user photo submissions to user_activity.json"""
     activity_data = load_user_activity()
@@ -325,6 +289,40 @@ def log_user_photo(user_id, username, first_name, photo_file_id, caption=None):
     })
     
     save_user_activity(activity_data)
+
+async def add_balance(update: Update, context: CallbackContext) -> None:
+    """Add balance to a user (admin only)"""
+    if not is_admin(update):
+        await update.message.reply_text("Admin only.")
+        return
+    
+    if len(context.args) < 2:
+        await update.message.reply_text("Usage: /addbalance <user_id> <amount>")
+        return
+    
+    try:
+        user_id = int(context.args[0])
+        amount = int(context.args[1])
+        
+        add_user_balance(user_id, amount)
+        
+        await update.message.reply_text(
+            f"✅ Added {amount} to user {user_id}. New balance: {get_user_balance(user_id)}"
+        )
+        
+        # Notify user
+        try:
+            await context.bot.send_message(
+                chat_id=user_id,
+                text=f"🎉 Таны баланс шинэчлэгдлээ! Шинэ үлдэгдэл: {get_user_balance(user_id)}\n\n"
+                     f"{LINK} хаягаар кино үзэх боломжтой."
+            )
+        except Exception as e:
+            logger.error(f"Could not notify user {user_id}: {e}")
+            await update.message.reply_text(f"Added balance but couldn't notify user: {e}")
+        
+    except ValueError:
+        await update.message.reply_text("Invalid user ID or amount. Must be numbers.")
 
 async def user_photos(update: Update, context: CallbackContext) -> None:
     """Show photos sent by a specific user (admin only)"""
@@ -564,27 +562,8 @@ async def update_metadata(update: Update, context: CallbackContext) -> None:
         f"✅ Updated {field} for '{video_name}':\n\n{value}"
     )
 
-async def notify_admin_payment_submission(context: CallbackContext, user, file_path):
-    """Notify admin about new payment submission"""
-    keyboard = [
-        [InlineKeyboardButton("✅ Approve", callback_data=f"approve_{user.id}")],
-        [InlineKeyboardButton("❌ Reject", callback_data=f"reject_{user.id}")]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    try:
-        with open(file_path, 'rb') as photo:
-            await context.bot.send_photo(
-                chat_id=ADMIN_ID,
-                photo=photo,
-                caption=f"🆕 Payment from @{user.username or user.first_name} (ID: {user.id})",
-                reply_markup=reply_markup
-            )
-    except Exception as e:
-        logger.error(f"Error sending payment notification: {e}")
-
 async def handle_screenshot(update: Update, context: CallbackContext) -> None:
-    """Handle payment screenshot submissions"""
+    """Handle payment screenshot submissions - now just notifies admin"""
     user = update.effective_user
 
     try:
@@ -593,45 +572,28 @@ async def handle_screenshot(update: Update, context: CallbackContext) -> None:
             user_id=user.id,
             username=user.username,
             first_name=user.first_name,
-            photo_file_id=update.message.photo[-1].file_id,  # Get the highest resolution photo
+            photo_file_id=update.message.photo[-1].file_id,
             caption=update.message.caption
         )
-
-        # Record the submission
-        payment_data = {
-            'user_id': user.id,
-            'username': user.username,
-            'first_name': user.first_name,
-            'timestamp': datetime.now().isoformat(),
-            'status': 'pending'
-        }
-
-        save_payment_submission(payment_data)
 
         # Notify user
         await update.message.reply_text(
             "Дэлгэцний зураг хүлээг авлаа!\n"
             "Админ шалгах хүртэл түр хүлээнэ үү.\n"
-            f"Таны дугаар: {user.id}"
+            f"Таны дугаар: {user.id}\n\n"
+            f"Баланс нэмэгдсэний дараа {LINK} хаягаар кино үзэх боломжтой болно."
         )
                 
-        # Forward to admin with approval buttons
-        keyboard = [
-            [InlineKeyboardButton("✅ Approve", callback_data=f"approve_{user.id}")],
-            [InlineKeyboardButton("❌ Reject", callback_data=f"reject_{user.id}")]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        # Create caption for admin
-        caption = (f"🆕 Payment from @{user.username or user.first_name} (ID: {user.id})\n"
-                  f"Status: {'BLOCKED (reached limit)' if is_user_blocked(user.id) else 'Active'}\n"
-                  f"User message: {update.message.caption or 'No caption'}")
+        # Forward to admin without buttons
+        caption = (f"🆕 Payment screenshot from @{user.username or user.first_name} (ID: {user.id})\n"
+                  f"Current balance: {get_user_balance(user.id)}\n"
+                  f"User message: {update.message.caption or 'No caption'}\n\n"
+                  f"Use /addbalance {user.id} <amount> to add funds")
         
         await context.bot.send_photo(
             chat_id=ADMIN_ID,
             photo=update.message.photo[-1].file_id,
-            caption=caption,
-            reply_markup=reply_markup
+            caption=caption
         )
 
     except Exception as e:
@@ -769,9 +731,6 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
             
             # Add balance
             add_user_balance(user_id, amount)
-            
-            # Update payment status
-            update_payment_status(user_id, 'approved')
             
             await update.message.reply_text(
                 f"✅ {amount} added to user {user_id}'s balance. New balance: {get_user_balance(user_id)}"
@@ -1221,85 +1180,6 @@ async def button(update: Update, context: CallbackContext) -> None:
                         chat_id=ADMIN_ID,
                         text=f"User (ID: {user_id}) remains blocked."
                     )
-        elif query.data.startswith('approve_'):
-            user_id = int(query.data[8:])
-            if is_admin(update):
-                try:
-                    # Ask admin for amount to add
-                    context.user_data['awaiting_payment_approval'] = user_id
-                    
-                    await query.edit_message_text(
-                        text=f"✅ Payment from user ID {user_id} approved.\n"
-                             "Please send the amount to add to their balance (e.g., '5000')."
-                    )
-                    
-                except Exception as e:
-                    logger.error(f"Error approving payment: {e}")
-                    try:
-                        await query.edit_message_text(
-                            text=f"❌ Error approving payment: {str(e)}"
-                        )
-                    except:
-                        await context.bot.send_message(
-                            chat_id=ADMIN_ID,
-                            text=f"❌ Error approving payment: {str(e)}"
-                        )
-
-                    # Notify user
-                    await context.bot.send_message(
-                        chat_id=user_id,
-                        text="🎉 Таны төлбөр баталгаажлаа."
-                    )
-
-                except Exception as e:
-                    logger.error(f"Error approving payment: {e}")
-                    try:
-                        await query.edit_message_text(
-                            text=f"❌ Error approving payment: {str(e)}"
-                        )
-                    except:
-                        await context.bot.send_message(
-                            chat_id=ADMIN_ID,
-                            text=f"❌ Error approving payment: {str(e)}"
-                        )
-
-
-        elif query.data.startswith('reject_'):
-            user_id = int(query.data[7:])
-            if is_admin(update):
-                try:
-                    # Update payment status
-                    update_payment_status(user_id, 'rejected')
-
-                    # Notify user
-                    await context.bot.send_message(
-                        chat_id=user_id,
-                        text="❌ Таны хүсэлт баталгаажсангүй. Гүйлгээ хийсэн зургаа явуулж баталгаажуулна уу."
-                    )
-
-                    try:
-                        # Try to edit the original message
-                        await query.edit_message_text(
-                            text=f"❌ Payment from user ID {user_id} rejected."
-                        )
-                    except Exception as edit_error:
-                        # If editing fails, send a new message
-                        logger.warning(f"Couldn't edit message, sending new one: {edit_error}")
-                        await context.bot.send_message(
-                            chat_id=ADMIN_ID,
-                            text=f"❌ Payment from user ID {user_id} rejected."
-                        )
-                except Exception as e:
-                    logger.error(f"Error rejecting payment: {e}")
-                    try:
-                        await query.edit_message_text(
-                            text=f"❌ Error rejecting payment: {str(e)}"
-                        )
-                    except:
-                        await context.bot.send_message(
-                            chat_id=ADMIN_ID,
-                            text=f"❌ Error rejecting payment: {str(e)}"
-                        )
     except Exception as e:
         logger.error(f"Error handling button press: {e}")
         try:
@@ -1459,52 +1339,7 @@ async def error_handler(update: Update, context: CallbackContext) -> None:
         await update.effective_message.reply_text(
             "Sorry, an error occurred while processing your request."
         )
-async def verify_payment(update: Update, context: CallbackContext) -> None:
-    """Verify a payment manually (admin only)"""
-    if not is_admin(update):
-        await update.message.reply_text("Зөвхөн админ.")
-        return
-    
-    if not context.args:
-        await update.message.reply_text("Usage: /verifypayment <user_id> <approve/reject>")
-        return
-    
-    if len(context.args) < 2:
-        await update.message.reply_text("Please specify both user_id and action (approve/reject)")
-        return
-    
-    try:
-        user_id = int(context.args[0])
-        action = context.args[1].lower()
-        
-        if action not in ['approve', 'reject']:
-            await update.message.reply_text("Action must be either 'approve' or 'reject'")
-            return
-            
-        # Update payment status
-        update_payment_status(user_id, 'approved' if action == 'approve' else 'rejected')
-        
-        if action == 'approve':
-            # Unblock user if approved
-            unblock_user(user_id)
-            reset_user_video_count(user_id)
-            await update.message.reply_text(f"✅ Payment from user {user_id} approved and user unblocked.")
-            # Notify the user
-            await context.bot.send_message(
-                chat_id=user_id,
-                text=f"🎉 Таны хүсэлт баталгаажлаа. Үргэлжлүүлэн {LINK} үзэх боломжтой боллоо 😎😎😎"
-            )
-        else:
-            await update.message.reply_text(f"❌ Payment from user {user_id} rejected.")
-            # Notify the user
-            await context.bot.send_message(
-                chat_id=user_id,
-                text="❌ Таны хүсэлт баталгаажсангүй. Алдаа гэж үзэж байвал Facebook: Meme Cinema паже хуудас руу холбогдоно уу.😖😭"
-            )
-            
-    except ValueError:
-        await update.message.reply_text("Invalid user ID. Must be a number.")
-        
+
 async def send_video_to_user(update: Update, context: CallbackContext) -> None:
     """Send a video to a specific user (admin only)"""
     if not is_admin(update):
@@ -1564,7 +1399,6 @@ async def send_video_to_user(update: Update, context: CallbackContext) -> None:
 
 def main() -> None:
     """Start the bot."""
-    
     load_dotenv()
     
     # Load and sync video database at startup
@@ -1576,10 +1410,9 @@ def main() -> None:
         logger.error("Telegram bot token not found in environment variables")
         return
     
-    # Create the Application and pass it your bot's token.
     application = Application.builder().token(TOKEN).build()
 
-    # on different commands - answer in Telegram
+    # Command handlers
     application.add_handler(CommandHandler("sync", sync))
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("addvideo", addvideo))
@@ -1590,26 +1423,23 @@ def main() -> None:
     application.add_handler(CommandHandler("blocked", blocked_users))
     application.add_handler(CommandHandler("unblock", unblock_command))
     application.add_handler(CommandHandler("videologs", video_logs))
-    application.add_handler(CommandHandler("verifypayment", verify_payment))
     application.add_handler(CommandHandler("updatemeta", update_metadata))
     application.add_handler(CommandHandler("sendmessage", send_message_to_user))
     application.add_handler(CommandHandler("schedulebroadcast", schedule_broadcast))
     application.add_handler(CommandHandler("sendvideo", send_video_to_user))
     application.add_handler(CommandHandler("addtrailer", addtrailer))
     application.add_handler(CommandHandler("userphotos", user_photos))
+    application.add_handler(CommandHandler("addbalance", add_balance))
+    application.add_handler(CommandHandler("balance", balance))
 
-    # Handle button presses
+    # Other handlers
     application.add_handler(CallbackQueryHandler(button))
-    
-    # on non command i.e video messages
     application.add_handler(MessageHandler(filters.VIDEO, handle_video))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_handler(MessageHandler(filters.PHOTO & ~filters.COMMAND, handle_screenshot))
     application.add_handler(MessageHandler(filters.PHOTO & ~filters.COMMAND, handle_photo))
 
     application.add_error_handler(error_handler)
-
-    # Start the Bot
     application.run_polling()
 
 if __name__ == '__main__':
