@@ -30,10 +30,7 @@ ADMIN_ID = 7905267896
 
 # User activity log file
 USER_ACTIVITY_FILE = 'db/user_activity.json'
-
 BLOCKED_USERS_FILE = 'db/blocked_users.json'
-MAX_VIDEOS_BEFORE_BLOCK = 5
-
 MOVIE_DETAILS = 'movie-details.json'
 PAYMENT_SUBMISSION = 'db/payment_submissions.json'
 LINK = 'https://munkh-hustle.github.io/Movie-Site/'
