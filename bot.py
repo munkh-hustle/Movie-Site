@@ -223,9 +223,13 @@ def log_sent_video(user_id, video_name):
     user_id_str = str(user_id)
     
     if user_id_str not in logs:
+        # Get user info from user_activity if available
+        activity_data = load_user_activity()
+        user_data = activity_data.get(user_id_str, {})
+        
         logs[user_id_str] = {
-            'username': '',
-            'first_name': '',
+            'username': user_data.get('username', ''),
+            'first_name': user_data.get('first_name', ''),
             'deliveries': []
         }
     
@@ -295,6 +299,20 @@ def save_video_logs(logs):
     """Save video delivery logs to file"""
     with open(VIDEO_LOG_FILE, 'w', encoding='utf-8') as f:
         json.dump(logs, f, indent=2)
+
+def has_user_paid_for_video(user_id, video_name):
+    """Check if user has already paid for this video"""
+    video_logs = load_video_logs()
+    user_id_str = str(user_id)
+    
+    if user_id_str not in video_logs:
+        return False
+    
+    # Check if this video has already been delivered to the user
+    for delivery in video_logs[user_id_str].get('deliveries', []):
+        if delivery['video_name'] == video_name:
+            return True
+    return False
 
 async def add_balance(update: Update, context: CallbackContext) -> None:
     """Add balance to a user (admin only)"""
@@ -620,9 +638,30 @@ async def send_video_with_limit_check(update: Update, context: CallbackContext, 
         return False
     
     video_price = video_data[video_name].get('price', 0)
+    
+    # Check if user has already paid for this video
+    if has_user_paid_for_video(user.id, video_name):
+        # User has already paid, just send the video without deducting balance
+        try:
+            await context.bot.send_video(
+                chat_id=update.effective_chat.id,
+                video=video_db[video_name],
+                protect_content=True,
+                caption=f"Таны үзэхгийг хүссэн кино энэ байна. Үлдэгдэл: {get_user_balance(user.id)}"
+            )
+            log_sent_video(user.id, video_name)
+            return True
+        except Exception as e:
+            logger.error(f"Error sending video: {e}")
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text="Кино илгээхэд алдаа гарлаа."
+            )
+            return False
+    
+    # First time watching this video - check balance and deduct
     user_balance = get_user_balance(user.id)
 
-     # Check if user has enough balance
     if user_balance < video_price:
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
@@ -640,7 +679,7 @@ async def send_video_with_limit_check(update: Update, context: CallbackContext, 
         )
         return False
     
-    # Deduct balance
+    # Deduct balance only if this is the first time watching
     if not deduct_user_balance(user.id, video_price):
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
