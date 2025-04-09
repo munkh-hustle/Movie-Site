@@ -53,6 +53,11 @@
         "timestamp": "2025-04-08T16:02:10.227745",
         "text": "Bsjabs",
         "chat_type": "private"
+      },
+      {
+        "timestamp": "2025-04-09T09:35:05.020284",
+        "text": "Start",
+        "chat_type": "private"
       }
     ],
     "photo_logs": [
@@ -64,6 +69,16 @@
       {
         "timestamp": "2025-04-08T16:02:20.089912",
         "photo_file_id": "AgACAgUAAxkBAAIKdmf02AoXWS9eoFnD5VDETfliGRY3AALSxzEb70KhV7UQbBsl-xJIAQADAgADeQADNgQ",
+        "caption": null
+      },
+      {
+        "timestamp": "2025-04-09T09:35:39.786207",
+        "photo_file_id": "AgACAgUAAxkBAAIK2mf1zutZUX66mGjPyOKhVze0zv6KAAJDxTEbtd6pVwfr_55Bg_r9AQADAgADeQADNgQ",
+        "caption": null
+      },
+      {
+        "timestamp": "2025-04-09T09:37:07.148040",
+        "photo_file_id": "AgACAgUAAxkBAAIK2mf1zutZUX66mGjPyOKhVze0zv6KAAJDxTEbtd6pVwfr_55Bg_r9AQADAgADeQADNgQ",
         "caption": null
       }
     ],
