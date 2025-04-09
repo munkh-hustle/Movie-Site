@@ -29,11 +29,14 @@ logger = logging.getLogger(__name__)
 ADMIN_ID = 7905267896
 
 # User activity log file
-USER_ACTIVITY_FILE = 'db/user_activity.json'
+USER_ACTIVITY_FILE = 'db/user_activity.json'  # store basic user info
+CHAT_LOG_FILE = 'db/chat_logs.json'          # For chat logs
+PHOTO_LOG_FILE = 'db/photo_logs.json'        # For photo logs
+VIDEO_LOG_FILE = 'db/video_logs.json'        # For video delivery logs
 BLOCKED_USERS_FILE = 'db/blocked_users.json'
+USER_BALANCES_FILE = 'db/user_balances.json'
 MOVIE_DETAILS = 'movie-details.json'
 LINK = 'https://munkh-hustle.github.io/Movie-Site/'
-USER_BALANCES_FILE = 'db/user_balances.json'
 
 # Dictionary to store video IDs and names
 video_db = {}
@@ -92,7 +95,7 @@ def add_user_balance(user_id, amount):
     save_user_balances(balances)
 
 def load_user_activity():
-    """Load user activity data from file"""
+    """Load basic user info from file"""
     try:
         with open(USER_ACTIVITY_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
@@ -100,7 +103,7 @@ def load_user_activity():
         return {}
     
 def save_user_activity(activity_data):
-    """Save user activity data to file"""
+    """Save basic user info to file"""
     with open(USER_ACTIVITY_FILE, 'w', encoding='utf-8') as f:
         json.dump(activity_data, f, indent=2)
 
@@ -139,7 +142,8 @@ def block_user(user_id, username, first_name):
     save_blocked_users(blocked_users)
 
 def record_user_activity(user_id, username, first_name, last_name, video_name):
-    """Record that a video was sent to a user"""
+    """Update basic user info and log video delivery"""
+    # Update basic user info
     activity_data = load_user_activity()
     user_id_str = str(user_id)
     
@@ -147,27 +151,12 @@ def record_user_activity(user_id, username, first_name, last_name, video_name):
         activity_data[user_id_str] = {
             'username': username,
             'first_name': first_name,
-            'last_name': last_name,
-            'videos': [],
-            'chat_log': [],
-            'photo_logs': [],
-            'video_delivery_log': []
+            'last_name': last_name
         }
+        save_user_activity(activity_data)
     
-    # Keep the videos array for backward compatibility - for unique video
-    activity_data[user_id_str]['videos'].append({
-        'video_name': video_name,
-        'timestamp': datetime.now().isoformat()
-    })
-    
-    # Also log in video_delivery_log / making it comment because it overwrites on user_activity.json
-    # activity_data[user_id_str]['video_delivery_log'].append({
-    #     'video_name': video_name,
-    #     'timestamp': datetime.now().isoformat(),
-    #     'status': 'sent'
-    # })
-    
-    save_user_activity(activity_data)
+    # Log the video delivery (this will create the user entry in video logs if needed)
+    log_sent_video(user_id, video_name)
 
 def load_video_data():
     """Load video metadata from movie-details.json file"""
@@ -199,37 +188,24 @@ def sync_video_data():
         return False
 
 def log_user_message(user_id, username, first_name, text, chat_type):
-    """Save user messages to user_activity.json"""
-    activity_data = load_user_activity()
+    """Save user messages to chat_logs.json"""
+    logs = load_chat_logs()
     user_id_str = str(user_id)
     
-    if user_id_str not in activity_data:
-        activity_data[user_id_str] = {
+    if user_id_str not in logs:
+        logs[user_id_str] = {
             'username': username,
             'first_name': first_name,
-            'last_name': '',
-            'videos': [],
-            'chat_log': [],
-            'photo_logs': []
+            'messages': []
         }
     
-    # Add message to chat log
-    activity_data[user_id_str].setdefault('chat_log', []).append({
+    logs[user_id_str]['messages'].append({
         'timestamp': datetime.now().isoformat(),
         'text': text,
         'chat_type': chat_type
     })
     
-    save_user_activity(activity_data)
-
-def reset_user_video_count(user_id):
-    """Reset a user's video count"""
-    activity_data = load_user_activity()
-    if str(user_id) in activity_data:
-        activity_data[str(user_id)]['videos'] = []
-        save_user_activity(activity_data)
-        return True
-    return False
+    save_chat_logs(logs)
 
 def unblock_user(user_id):
     """Unblock a user and reset their video count"""
@@ -238,57 +214,87 @@ def unblock_user(user_id):
         blocked_users[str(user_id)]['unblocked'] = True
         blocked_users[str(user_id)]['unblocked_at'] = datetime.now().isoformat()
         save_blocked_users(blocked_users)
-        reset_user_video_count(user_id)  # Reset their video count
         return True
     return False
 
 def log_sent_video(user_id, video_name):
-    """Log successfully sent videos in user_activity.json"""
-    activity_data = load_user_activity()
+    """Log successfully sent videos in video_logs.json"""
+    logs = load_video_logs()
     user_id_str = str(user_id)
     
-    if user_id_str not in activity_data:
-        activity_data[user_id_str] = {
+    if user_id_str not in logs:
+        logs[user_id_str] = {
             'username': '',
             'first_name': '',
-            'last_name': '',
-            'videos': [],
-            'chat_log': [],
-            'photo_logs': []
+            'deliveries': []
         }
     
-    # Add video delivery log
-    activity_data[user_id_str].setdefault('video_delivery_log', []).append({
+    logs[user_id_str]['deliveries'].append({
         'timestamp': datetime.now().isoformat(),
         'video_name': video_name,
         'status': 'sent'
     })
     
-    save_user_activity(activity_data)
+    save_video_logs(logs)
 
 def log_user_photo(user_id, username, first_name, photo_file_id, caption=None):
-    """Save user photo submissions to user_activity.json"""
-    activity_data = load_user_activity()
+    """Save user photo submissions to photo_logs.json"""
+    logs = load_photo_logs()
     user_id_str = str(user_id)
     
-    if user_id_str not in activity_data:
-        activity_data[user_id_str] = {
+    if user_id_str not in logs:
+        logs[user_id_str] = {
             'username': username,
             'first_name': first_name,
-            'last_name': '',
-            'videos': [],
-            'chat_log': [],
-            'photo_logs': []
+            'photos': []
         }
     
-    # Add photo to photo_logs
-    activity_data[user_id_str]['photo_logs'].append({
+    logs[user_id_str]['photos'].append({
         'timestamp': datetime.now().isoformat(),
         'photo_file_id': photo_file_id,
         'caption': caption
     })
     
-    save_user_activity(activity_data)
+    save_photo_logs(logs)
+
+def load_chat_logs():
+    """Load chat logs from file"""
+    try:
+        with open(CHAT_LOG_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+def save_chat_logs(logs):
+    """Save chat logs to file"""
+    with open(CHAT_LOG_FILE, 'w', encoding='utf-8') as f:
+        json.dump(logs, f, indent=2)
+
+def load_photo_logs():
+    """Load photo logs from file"""
+    try:
+        with open(PHOTO_LOG_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+def save_photo_logs(logs):
+    """Save photo logs to file"""
+    with open(PHOTO_LOG_FILE, 'w', encoding='utf-8') as f:
+        json.dump(logs, f, indent=2)
+
+def load_video_logs():
+    """Load video delivery logs from file"""
+    try:
+        with open(VIDEO_LOG_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+def save_video_logs(logs):
+    """Save video delivery logs to file"""
+    with open(VIDEO_LOG_FILE, 'w', encoding='utf-8') as f:
+        json.dump(logs, f, indent=2)
 
 async def add_balance(update: Update, context: CallbackContext) -> None:
     """Add balance to a user (admin only)"""
@@ -336,26 +342,26 @@ async def user_photos(update: Update, context: CallbackContext) -> None:
     
     try:
         user_id = int(context.args[0])
-        activity_data = load_user_activity()
+        photo_logs = load_photo_logs()
         user_id_str = str(user_id)
         
-        if user_id_str not in activity_data:
-            await update.message.reply_text(f"User {user_id} not found in activity logs.")
+        if user_id_str not in photo_logs:
+            await update.message.reply_text(f"No photos found for user {user_id}.")
             return
         
-        photo_logs = activity_data[user_id_str].get('photo_logs', [])
-        if not photo_logs:
+        photos = photo_logs[user_id_str].get('photos', [])
+        if not photos:
             await update.message.reply_text(f"No photos found for user {user_id}.")
             return
         
         await update.message.reply_text(f"📸 Photos sent by user {user_id}:")
         
-        for photo_log in photo_logs:
+        for photo in photos:
             try:
                 await context.bot.send_photo(
                     chat_id=update.effective_chat.id,
-                    photo=photo_log['photo_file_id'],
-                    caption=f"Timestamp: {photo_log['timestamp']}\nCaption: {photo_log.get('caption', 'None')}"
+                    photo=photo['photo_file_id'],
+                    caption=f"Timestamp: {photo['timestamp']}\nCaption: {photo.get('caption', 'None')}"
                 )
                 await asyncio.sleep(1)  # Small delay to avoid rate limits
             except Exception as e:
@@ -972,20 +978,20 @@ async def sync(update: Update, context: CallbackContext) -> None:
         await update.message.reply_text("No changes needed - databases are already in sync.")
 
 async def video_logs(update: Update, context: CallbackContext) -> None:
-    """Show video delivery logs (admin only) from user_activity.json"""
+    """Show video delivery logs (admin only) from video_logs.json"""
     if not is_admin(update):
         await update.message.reply_text("Зөвхөн админ.")
         return
     
-    activity_data = load_user_activity()
+    logs = load_video_logs()
     
     # Collect all video delivery logs
     video_counts = {}
     total_sends = 0
     
-    for user_id, data in activity_data.items():
-        if 'video_delivery_log' in data:
-            for log in data['video_delivery_log']:
+    for user_id, data in logs.items():
+        if 'deliveries' in data:
+            for log in data['deliveries']:
                 video_name = log['video_name']
                 video_counts[video_name] = video_counts.get(video_name, 0) + 1
                 total_sends += 1
@@ -1030,13 +1036,13 @@ async def rename(update: Update, context: CallbackContext) -> None:
         # Update video_db
         video_db[new_name] = video_db.pop(old_name)
         
-        # Update user activity logs
-        activity_data = load_user_activity()
-        for user_data in activity_data.values():
-            for video in user_data['videos']:
-                if video['video_name'] == old_name:
-                    video['video_name'] = new_name
-        save_user_activity(activity_data)
+        # Update video logs
+        video_logs = load_video_logs()
+        for user_data in video_logs.values():
+            for delivery in user_data.get('deliveries', []):
+                if delivery['video_name'] == old_name:
+                    delivery['video_name'] = new_name
+        save_video_logs(video_logs)
         
         await update.message.reply_text(f"Video renamed from '{old_name}' to '{new_name}'")
     else:
@@ -1143,7 +1149,6 @@ async def button(update: Update, context: CallbackContext) -> None:
                 if str(user_id) in blocked_users:
                     user_data = blocked_users.pop(str(user_id))
                     save_blocked_users(blocked_users)
-                    reset_user_video_count(user_id)
                     
                     try:
                         await query.edit_message_text(
@@ -1305,20 +1310,20 @@ async def user_stats(update: Update, context: CallbackContext) -> None:
         search_term = ' '.join(context.args)[7:]  # Remove 'search:' prefix
         return await search_user_messages(update, context, search_term)
 
-    activity_data = load_user_activity()
+    video_logs = load_video_logs()
     
-    if not activity_data:
+    if not video_logs:
         await update.message.reply_text("No user activity recorded yet.")
         return
     
     message = ["📊 User Activity Report:"]
     total_sends = 0
     
-    for user_id, data in activity_data.items():
+    for user_id, data in video_logs.items():
         username = data.get('username', 'unknown')
-        video_count = len(data.get('video_delivery_log', []))
+        video_count = len(data.get('deliveries', []))
         total_sends += video_count
-        last_video = data['video_delivery_log'][-1]['video_name'] if data.get('video_delivery_log') else 'none'
+        last_video = data['deliveries'][-1]['video_name'] if data.get('deliveries') else 'none'
         
         message.append(
             f"\n👤 User: {username} (ID: {user_id})\n"
