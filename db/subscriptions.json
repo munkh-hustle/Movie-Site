@@ -1,10 +1,10 @@
 {
   "7942816218": {
-    "category": "bl",
-    "start_date": "2025-04-10T08:41:21.200769",
-    "end_date": "2025-05-10T08:41:21.200769",
+    "category": "all",
+    "start_date": "2025-04-10T09:03:09.140145",
+    "end_date": "2025-05-10T09:03:09.140145",
     "duration": "1_month",
-    "price": 5000,
+    "price": 10000,
     "activated_by_admin": true
   }
 }
