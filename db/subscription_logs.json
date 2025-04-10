@@ -1,0 +1,14 @@
+{
+  "7942816218": [
+    {
+      "timestamp": "2025-04-10T08:41:21.200769",
+      "action": "activated",
+      "details": {
+        "category": "bl",
+        "duration": "1_month",
+        "price": 5000,
+        "end_date": "2025-05-10T08:41:21.200769"
+      }
+    }
+  ]
+}

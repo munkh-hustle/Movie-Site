@@ -5,7 +5,7 @@ import io
 import asyncio
 from telegram.error import RetryAfter
 from PIL import Image
-from datetime import datetime
+from datetime import datetime, timedelta
 from telegram import InputMediaPhoto
 from telegram import Message, Chat, User
 from dotenv import load_dotenv
@@ -29,6 +29,8 @@ logger = logging.getLogger(__name__)
 ADMIN_ID = 7905267896
 
 # User activity log file
+SUBSCRIPTIONS_FILE = 'db/subscriptions.json'  # Active subscriptions
+SUBSCRIPTION_LOGS_FILE = 'db/subscription_logs.json'  # Historical logs
 USER_ACTIVITY_FILE = 'db/user_activity.json'  # store basic user info
 CHAT_LOG_FILE = 'db/chat_logs.json'          # For chat logs
 PHOTO_LOG_FILE = 'db/photo_logs.json'        # For photo logs
@@ -37,6 +39,24 @@ BLOCKED_USERS_FILE = 'db/blocked_users.json'
 USER_BALANCES_FILE = 'db/user_balances.json'
 MOVIE_DETAILS = 'movie-details.json'
 LINK = 'https://munkh-hustle.github.io/Movie-Site/'
+
+# Subscription prices
+SUBSCRIPTION_PRICES = {
+    '1_month': {
+        'single': 5000,
+        'all': 10000
+    },
+    '3_months': {
+        'single': 10000,
+        'all': 25000
+    },
+    '6_months': {
+        'single': 25000,
+        'all': 75000
+    }
+}
+
+CATEGORIES = ['movielex', 'animelex', 'bl', 'gl', 'seriallex']
 
 # Dictionary to store video IDs and names
 video_db = {}
@@ -61,7 +81,12 @@ def load_user_balances():
     """Load user balances from JSON file"""
     try:
         with open(USER_BALANCES_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
+            data = json.load(f)
+            # Convert old format to new format if needed
+            for user_id, value in data.items():
+                if isinstance(value, int):
+                    data[user_id] = {'balance': value, 'subscription': None}
+            return data
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
 
@@ -73,15 +98,15 @@ def save_user_balances(balances):
 def get_user_balance(user_id):
     """Get a user's current balance"""
     balances = load_user_balances()
-    return balances.get(str(user_id), 5000)
+    return balances.get(str(user_id), {}).get('balance', 5000)  # Default balance is 5000
 
 def deduct_user_balance(user_id, amount):
     """Deduct from user's balance"""
     balances = load_user_balances()
     user_id_str = str(user_id)
-    current_balance = balances.get(user_id_str, 0)
-    if current_balance >= amount:
-        balances[user_id_str] = current_balance - amount
+    user_data = balances.setdefault(user_id_str, {'balance': 5000, 'subscription': None})
+    if user_data['balance'] >= amount:
+        user_data['balance'] -= amount
         save_user_balances(balances)
         return True
     return False
@@ -90,8 +115,8 @@ def add_user_balance(user_id, amount):
     """Add to user's balance"""
     balances = load_user_balances()
     user_id_str = str(user_id)
-    current_balance = balances.get(user_id_str, 0)
-    balances[user_id_str] = current_balance + amount
+    user_data = balances.setdefault(user_id_str, {'balance': 5000, 'subscription': None})
+    user_data['balance'] += amount
     save_user_balances(balances)
 
 def load_user_activity():
@@ -313,6 +338,275 @@ def has_user_paid_for_video(user_id, video_name):
         if delivery['video_name'] == video_name:
             return True
     return False
+
+def get_user_subscription(user_id):
+    """Get user's active subscription"""
+    subscriptions = load_subscriptions()
+    user_id_str = str(user_id)
+    
+    if user_id_str not in subscriptions:
+        return None
+        
+    subscription = subscriptions[user_id_str]
+    end_date = datetime.fromisoformat(subscription['end_date'])
+    
+    # Check if subscription is still active
+    if datetime.now() < end_date:
+        return subscription
+    else:
+        # Subscription expired, remove it
+        del subscriptions[user_id_str]
+        save_subscriptions(subscriptions)
+        return None
+
+def activate_subscription(user_id, category, duration, bypass_balance_check=False):
+    """Activate a subscription for user"""
+    balances = load_user_balances()
+    subscriptions = load_subscriptions()
+    user_id_str = str(user_id)
+    
+    if duration not in ['1_month', '3_months', '6_months']:
+        return False
+        
+    if category == 'all':
+        price = SUBSCRIPTION_PRICES[duration]['all']
+    else:
+        price = SUBSCRIPTION_PRICES[duration]['single']
+    
+    # Get user balance (initialize if doesn't exist)
+    user_balance = balances.setdefault(user_id_str, {'balance': 5000}).get('balance', 5000)
+    
+    # Only check balance if not bypassing (for admin commands)
+    if not bypass_balance_check and user_balance < price:
+        return False
+    
+    # Calculate start and end dates
+    start_date = datetime.now()
+    months = int(duration.split('_')[0])
+    end_date = start_date + timedelta(days=30*months)
+    
+    # Create subscription record
+    subscription_data = {
+        'category': category,
+        'start_date': start_date.isoformat(),
+        'end_date': end_date.isoformat(),
+        'duration': duration,
+        'price': price,
+        'activated_by_admin': bypass_balance_check
+    }
+    
+    # Store subscription
+    subscriptions[user_id_str] = subscription_data
+    save_subscriptions(subscriptions)
+    
+    # Log the action
+    log_subscription_action(
+        user_id,
+        'activated',
+        {
+            'category': category,
+            'duration': duration,
+            'price': price,
+            'end_date': end_date.isoformat()
+        }
+    )
+    
+    # Only deduct balance if not bypassing
+    if not bypass_balance_check:
+        balances[user_id_str]['balance'] = user_balance - price
+        save_user_balances(balances)
+    
+    return True
+
+def load_subscriptions():
+    """Load active subscriptions from file"""
+    try:
+        with open(SUBSCRIPTIONS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+def save_subscriptions(subscriptions):
+    """Save active subscriptions to file"""
+    with open(SUBSCRIPTIONS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(subscriptions, f, indent=2)
+
+def load_subscription_logs():
+    """Load subscription history logs"""
+    try:
+        with open(SUBSCRIPTION_LOGS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+def save_subscription_logs(logs):
+    """Save subscription history logs"""
+    with open(SUBSCRIPTION_LOGS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(logs, f, indent=2)
+
+def log_subscription_action(user_id, action, details):
+    """Record a subscription action in the logs"""
+    logs = load_subscription_logs()
+    user_id_str = str(user_id)
+    
+    if user_id_str not in logs:
+        logs[user_id_str] = []
+    
+    logs[user_id_str].append({
+        'timestamp': datetime.now().isoformat(),
+        'action': action,
+        'details': details
+    })
+    
+    save_subscription_logs(logs)
+
+async def subscription_history(update: Update, context: CallbackContext) -> None:
+    """View subscription history for a user (admin only)"""
+    if not is_admin(update):
+        await update.message.reply_text("Зөвхөн админ.")
+        return
+    
+    if not context.args:
+        await update.message.reply_text("Usage: /subhistory <user_id>")
+        return
+    
+    try:
+        user_id = context.args[0]
+        logs = load_subscription_logs()
+        
+        if user_id not in logs or not logs[user_id]:
+            await update.message.reply_text(f"No subscription history found for user {user_id}")
+            return
+            
+        # Get user info
+        activity_data = load_user_activity()
+        user_info = activity_data.get(user_id, {})
+        
+        message = [
+            f"📜 Subscription history for {user_info.get('first_name', 'Unknown')} "
+            f"(@{user_info.get('username', 'N/A')}, ID: {user_id}):"
+        ]
+        
+        for log in logs[user_id]:
+            timestamp = datetime.fromisoformat(log['timestamp']).strftime('%Y-%m-%d %H:%M')
+            message.append(
+                f"\n🕒 {timestamp} - {log['action'].upper()}\n"
+                f"Details: {json.dumps(log['details'], indent=2, ensure_ascii=False)}"
+            )
+        
+        await update.message.reply_text('\n'.join(message))
+        
+    except Exception as e:
+        logger.error(f"Error viewing subscription history: {e}")
+        await update.message.reply_text("An error occurred while fetching history.")
+
+async def view_subscriptions(update: Update, context: CallbackContext) -> None:
+    """View all active subscriptions (admin only)"""
+    if not is_admin(update):
+        await update.message.reply_text("Зөвхөн админ.")
+        return
+    
+    subscriptions = load_subscriptions()
+    now = datetime.now()
+    active_subs = []
+    
+    for user_id, sub_data in subscriptions.items():
+        end_date = datetime.fromisoformat(sub_data['end_date'])
+        if now < end_date:  # Only show active subscriptions
+            # Get user info from activity logs
+            activity_data = load_user_activity()
+            user_info = activity_data.get(user_id, {})
+            
+            active_subs.append({
+                'user_id': user_id,
+                'username': user_info.get('username', 'N/A'),
+                'first_name': user_info.get('first_name', 'N/A'),
+                'subscription': sub_data,
+                'days_left': (end_date - now).days
+            })
+    
+    if not active_subs:
+        await update.message.reply_text("No active subscriptions found.")
+        return
+    
+    # Sort by days remaining
+    active_subs.sort(key=lambda x: x['days_left'])
+    
+    message = ["📋 Active Subscriptions:"]
+    for sub in active_subs:
+        message.append(
+            f"\n👤 User: {sub['first_name']} (@{sub['username']}, ID: {sub['user_id']})\n"
+            f"📌 Category: {sub['subscription']['category']}\n"
+            f"⏳ Duration: {sub['subscription']['duration']}\n"
+            f"💰 Price: {sub['subscription']['price']}\n"
+            f"📅 Start: {datetime.fromisoformat(sub['subscription']['start_date']).strftime('%Y-%m-%d')}\n"
+            f"📅 End: {datetime.fromisoformat(sub['subscription']['end_date']).strftime('%Y-%m-%d')}\n"
+            f"⏱️ Days left: {sub['days_left']}\n"
+            f"🛠️ Activated by admin: {'Yes' if sub['subscription'].get('activated_by_admin') else 'No'}"
+        )
+    
+    await update.message.reply_text('\n'.join(message))
+
+async def set_subscription(update: Update, context: CallbackContext) -> None:
+    """Set subscription for a user (admin only)"""
+    if not is_admin(update):
+        await update.message.reply_text("Зөвхөн админ.")
+        return
+    
+    if len(context.args) < 3:
+        await update.message.reply_text(
+            "Usage: /subscription <user_id> <months> <category>\n\n"
+            "Example: /subscription 12345678 1 gl\n\n"
+            "Categories: movielex, animelex, bl, gl, seriallex, all\n"
+            "Months: 1, 3, or 6"
+        )
+        return
+    
+    try:
+        user_id = int(context.args[0])
+        months = int(context.args[1])
+        category = context.args[2].lower()
+        
+        # Validate months
+        if months not in [1, 3, 6]:
+            await update.message.reply_text("Invalid duration. Must be 1, 3, or 6 months.")
+            return
+            
+        # Validate category
+        if category not in CATEGORIES and category != 'all':
+            await update.message.reply_text(
+                f"Invalid category. Valid categories are: {', '.join(CATEGORIES)}, all"
+            )
+            return
+            
+        duration = f"{months}_month{'s' if months > 1 else ''}"
+        
+        # Activate subscription with balance check bypass for admin
+        if activate_subscription(user_id, category, duration, bypass_balance_check=True):
+            await update.message.reply_text(
+                f"✅ Subscription activated for user {user_id}:\n"
+                f"Category: {category}\n"
+                f"Duration: {months} month{'s' if months > 1 else ''}\n\n"
+                f"New balance: {get_user_balance(user_id)}"
+            )
+            
+            # Notify user
+            try:
+                await context.bot.send_message(
+                    chat_id=user_id,
+                    text=f"🎉 Таны төлбөр баталгаажлаа!\n\n"
+                         f"Таны захиалга: {category} ({months} month{'s' if months > 1 else ''})\n\n"
+                         f"{LINK} хаягаар кино үзэх боломжтой."
+                )
+            except Exception as e:
+                logger.error(f"Could not notify user {user_id}: {e}")
+        else:
+            await update.message.reply_text(
+                "❌ Failed to activate subscription. Please check the parameters."
+            )
+            
+    except ValueError:
+        await update.message.reply_text("Invalid user ID or months. Must be numbers.")
 
 async def add_balance(update: Update, context: CallbackContext) -> None:
     """Add balance to a user (admin only)"""
@@ -587,7 +881,7 @@ async def update_metadata(update: Update, context: CallbackContext) -> None:
     )
 
 async def handle_screenshot(update: Update, context: CallbackContext) -> None:
-    """Handle payment screenshot submissions - now just notifies admin"""
+    """Handle payment screenshot submissions"""
     user = update.effective_user
 
     try:
@@ -608,11 +902,12 @@ async def handle_screenshot(update: Update, context: CallbackContext) -> None:
             f"Баланс нэмэгдсэний дараа {LINK} хаягаар кино үзэх боломжтой болно."
         )
                 
-        # Forward to admin without buttons
+        # Forward to admin with instructions
         caption = (f"🆕 Payment screenshot from @{user.username or user.first_name} (ID: {user.id})\n"
                   f"Current balance: {get_user_balance(user.id)}\n"
                   f"User message: {update.message.caption or 'No caption'}\n\n"
-                  f"Use /addbalance {user.id} <amount> to add funds")
+                  f"Use /subscription {user.id} <months> <category> to set subscription\n"
+                  f"Or /addbalance {user.id} <amount> to add funds")
         
         await context.bot.send_photo(
             chat_id=ADMIN_ID,
@@ -637,6 +932,33 @@ async def send_video_with_limit_check(update: Update, context: CallbackContext, 
         )
         return False
     
+    # Check if user has active subscription
+    subscription = get_user_subscription(user.id)
+    if subscription:
+        now = datetime.now()
+        expires = datetime.fromisoformat(subscription['expires'])
+        video_category = video_data[video_name].get('category', 'other')
+        
+        if now < expires and (subscription['category'] == 'all' or 
+                            subscription['category'] == video_category):
+            # Subscription covers this video
+            try:
+                await context.bot.send_video(
+                    chat_id=update.effective_chat.id,
+                    video=video_db[video_name],
+                    protect_content=True,
+                    caption=f"Таны үзэхгийг хүссэн кино энэ байна. (Subscription active)"
+                )
+                log_sent_video(user.id, video_name)
+                return True
+            except Exception as e:
+                logger.error(f"Error sending video: {e}")
+                await context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text="Кино илгээхэд алдаа гарлаа."
+                )
+                return False
+
     video_price = video_data[video_name].get('price', 0)
     
     # Check if user has already paid for this video
@@ -768,7 +1090,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
     message = update.effective_message
     
-    # Check if admin is setting a limit for a user
+    # Check if admin is setting a balance for a user
     if is_admin(update) and 'awaiting_payment_approval' in context.user_data:
         try:
             amount = int(message.text)
@@ -782,10 +1104,14 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
             )
             
             # Notify user
-            await context.bot.send_message(
-                chat_id=user_id,
-                text=f"🎉 Таны төлбөр баталгаажлаа! Таны дансанд {amount} нэмэгдлээ. Нийт үлдэгдэл: {get_user_balance(user_id)}\n\n{LINK}"
-            )
+            try:
+                await context.bot.send_message(
+                    chat_id=user_id,
+                    text=f"🎉 Таны баланс шинэчлэгдлээ! Шинэ үлдэгдэл: {get_user_balance(user_id)}\n\n"
+                         f"{LINK} хаягаар кино үзэх боломжтой."
+                )
+            except Exception as e:
+                logger.error(f"Could not notify user {user_id}: {e}")
             
             # Clear the awaiting state
             del context.user_data['awaiting_payment_approval']
@@ -1157,17 +1483,16 @@ async def list_videos(update: Update, context: CallbackContext) -> None:
 async def button(update: Update, context: CallbackContext) -> None:
     """Handle button presses"""
     query = update.callback_query
+    await query.answer()
 
     try:
-        await query.answer()
-
+        # Keep only the video and unblock button handling
         if query.data.startswith('video_'):
             video_name = query.data[6:]
             if video_name in video_db:
                 user = query.from_user
                 try:
                     success = await send_video_with_limit_check(update, context, user, video_name)
-
                     if not success:
                         await query.edit_message_text(text="Кино үзэх эрх дууслаа.")
                 except Exception as e:
@@ -1474,7 +1799,10 @@ def main() -> None:
     application.add_handler(CommandHandler("addtrailer", addtrailer))
     application.add_handler(CommandHandler("userphotos", user_photos))
     application.add_handler(CommandHandler("addbalance", add_balance))
-    application.add_handler(CommandHandler("balance", balance))
+    application.add_handler(CommandHandler("balance", balance))    
+    application.add_handler(CommandHandler("subscription", set_subscription))
+    application.add_handler(CommandHandler("subscriptions", view_subscriptions))
+    application.add_handler(CommandHandler("subhistory", subscription_history))
 
     # Other handlers
     application.add_handler(CallbackQueryHandler(button))
