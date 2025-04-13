@@ -6,5 +6,13 @@
     "duration": "1_month",
     "price": 10000,
     "activated_by_admin": true
+  },
+  "792816218": {
+    "category": "bl",
+    "start_date": "2025-04-13T17:20:41.974736",
+    "end_date": "2025-05-13T17:20:41.974736",
+    "duration": "1_month",
+    "price": 5000,
+    "activated_by_admin": true
   }
 }

@@ -556,8 +556,8 @@ async def set_subscription(update: Update, context: CallbackContext) -> None:
     
     if len(context.args) < 3:
         await update.message.reply_text(
-            "Usage: /subscription <user_id> <months> <category>\n\n"
-            "Example: /subscription 12345678 1 gl\n\n"
+            "Usage: /subset <user_id> <months> <category>\n\n"
+            "Example: /subset 12345678 1 gl\n\n"
             "Categories: movielex, animelex, bl, gl, seriallex, all\n"
             "Months: 1, 3, or 6"
         )
@@ -907,7 +907,7 @@ async def handle_screenshot(update: Update, context: CallbackContext) -> None:
         caption = (f"🆕 Payment screenshot from @{user.username or user.first_name} (ID: {user.id})\n"
                   f"Current balance: {get_user_balance(user.id)}\n"
                   f"User message: {update.message.caption or 'No caption'}\n\n"
-                  f"Use /subscription {user.id} <months> <category> to set subscription\n"
+                  f"Use /subset {user.id} <months> <category> to set subscription\n"
                   f"Or /addbalance {user.id} <amount> to add funds")
         
         await context.bot.send_photo(
@@ -1841,7 +1841,7 @@ def main() -> None:
     application.add_handler(CommandHandler("userphotos", user_photos))
     application.add_handler(CommandHandler("addbalance", add_balance))
     application.add_handler(CommandHandler("balance", balance))    
-    application.add_handler(CommandHandler("subscription", set_subscription))
+    application.add_handler(CommandHandler("subset", set_subscription))
     application.add_handler(CommandHandler("subscriptions", view_subscriptions))
     application.add_handler(CommandHandler("subhistory", subscription_history))
     application.add_handler(CommandHandler("aldaa", aldaa))
