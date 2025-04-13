@@ -688,16 +688,38 @@ async def user_photos(update: Update, context: CallbackContext) -> None:
         await update.message.reply_text(f"An error occurred: {str(e)}")
 
 async def balance(update: Update, context: CallbackContext) -> None:
-    """Check user balance"""
+    """Check user balance and subscription status"""
     user = update.effective_user
     balance = get_user_balance(user.id)
+    subscription = get_user_subscription(user.id)
     
-    await update.message.reply_text(
-        f"Таны үлдэгдэл: {balance}\n\n"
-        "Цэнэглэх: Хаан банк О.МӨНХ-ЭРДЭНЭ 5926271236\n"
-        "Гүйлгээний утга: утасны дугаар\n"
+    # Base message with balance
+    message = [
+        f"💰 Таны боломжит үлдэгдэл: {balance}",
+        "",
+        "Цэнэглэх: Хаан банк О.МӨНХ-ЭРДЭНЭ 5926271236",
+        "Гүйлгээний утга: утасны дугаар",
         "Шилжүүлснийхээ дараа төлбөр төлсөн дэлгэцийн зургаа дарж ийшээ явуулна уу."
-    )
+    ]
+    
+    # Add subscription info if active
+    if subscription:
+        end_date = datetime.fromisoformat(subscription['end_date']).strftime('%Y-%m-%d')
+        days_left = (datetime.fromisoformat(subscription['end_date']) - datetime.now()).days
+        
+        message.extend([
+            "",
+            "🎟️ Таны захиалсан багц:",
+            f"• Төрөл: {subscription['category']}",
+            f"• Дуусах хугацаа: {end_date}",
+            f"• Үлдсэн хоног: {days_left}",
+            f"• Үнэ: {subscription['price']}",
+            f"• Хугацаа: {subscription['duration'].replace('_', ' ')}"
+        ])
+    else:
+        message.append("\nℹ️ Таньд захиалсан багц байхгүй байна.")
+    
+    await update.message.reply_text('\n'.join(message))
 
 async def _send_broadcast(context: CallbackContext):
     job = context.job
