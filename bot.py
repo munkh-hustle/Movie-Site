@@ -39,6 +39,7 @@ BLOCKED_USERS_FILE = 'db/blocked_users.json'
 USER_BALANCES_FILE = 'db/user_balances.json'
 MOVIE_DETAILS = 'movie-details.json'
 LINK = 'https://munkh-hustle.github.io/Movie-Site/'
+TROUBLESHOOT_VIDEO = ""
 
 # Subscription prices
 SUBSCRIPTION_PRICES = {
@@ -1784,7 +1785,7 @@ async def aldaa(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
     
     # Video ID to send
-    video_id = "BAACAgUAAxkBAAIMQ2f33XUPvMs0HZYbk0ADamMvNw98AAKaGQAC-TvAV0E34E0txQhONgQ"
+    video_id = TROUBLESHOOT_VIDEO
     
     # Message text
     message_text = "Кино гацах эсвэл алдаа гарсан үед ингэж засаарай"
