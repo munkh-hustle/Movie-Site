@@ -1779,6 +1779,33 @@ async def send_video_to_user(update: Update, context: CallbackContext) -> None:
             f"Failed to send video to user. Error: {str(e)}"
         )
 
+async def aldaa(update: Update, context: CallbackContext) -> None:
+    """Handle /aldaa command - send troubleshooting video"""
+    user = update.effective_user
+    
+    # Video ID to send
+    video_id = "BAACAgUAAxkBAAIMQ2f33XUPvMs0HZYbk0ADamMvNw98AAKaGQAC-TvAV0E34E0txQhONgQ"
+    
+    # Message text
+    message_text = "Кино гацах эсвэл алдаа гарсан үед ингэж засаарай"
+    
+    try:
+        await context.bot.send_video(
+            chat_id=update.effective_chat.id,
+            video=video_id,
+            caption=message_text,
+            protect_content=True
+        )
+        
+        # Log that this video was sent
+        log_sent_video(user.id, "aldaa_troubleshooting_video")
+        
+    except Exception as e:
+        logger.error(f"Error sending aldaa video: {e}")
+        await update.message.reply_text(
+            "Алдаа гарлаа. Видео илгээхэд асуудал гарсан байна. Дараа дахин оролдоно уу."
+        )
+
 def main() -> None:
     """Start the bot."""
     load_dotenv()
@@ -1816,6 +1843,7 @@ def main() -> None:
     application.add_handler(CommandHandler("subscription", set_subscription))
     application.add_handler(CommandHandler("subscriptions", view_subscriptions))
     application.add_handler(CommandHandler("subhistory", subscription_history))
+    application.add_handler(CommandHandler("aldaa", aldaa))
 
     # Other handlers
     application.add_handler(CallbackQueryHandler(button))
