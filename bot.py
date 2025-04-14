@@ -177,12 +177,17 @@ def record_user_activity(user_id, username, first_name, last_name, video_name):
         activity_data[user_id_str] = {
             'username': username,
             'first_name': first_name,
-            'last_name': last_name
+            'last_name': last_name,
+            'referral_code': user_id_str,
+            'referred_by': None,
+            'referrals': [],
+            'movies_watched': 0,
+            'referral_credits_earned': 0
         }
-        save_user_activity(activity_data)
     
-    # Log the video delivery (this will create the user entry in video logs if needed)
+    # Log the video delivery
     log_sent_video(user_id, video_name)
+    save_user_activity(activity_data)
 
 def load_video_data():
     """Load video metadata from movie-details.json file"""
@@ -460,6 +465,188 @@ def log_subscription_action(user_id, action, details):
     })
     
     save_subscription_logs(logs)
+
+def update_user_activity(user_id, updates):
+    """Update specific fields in user activity"""
+    activity_data = load_user_activity()
+    user_id_str = str(user_id)
+    
+    if user_id_str not in activity_data:
+        # Initialize with basic structure if new user
+        activity_data[user_id_str] = {
+            'username': None,
+            'first_name': None,
+            'last_name': None,
+            'referral_code': user_id_str,
+            'referred_by': None,
+            'referrals': [],
+            'movies_watched': 0,
+            'referral_credits_earned': 0
+        }
+    
+    # Apply updates
+    for key, value in updates.items():
+        activity_data[user_id_str][key] = value
+    
+    save_user_activity(activity_data)
+    return activity_data[user_id_str]
+
+def get_referral_chain(user_id):
+    """Get the referral chain (u1 -> u2 -> u3) for a user"""
+    activity_data = load_user_activity()
+    user_id_str = str(user_id)
+    
+    if user_id_str not in activity_data or not activity_data[user_id_str].get('referred_by'):
+        return []
+    
+    chain = []
+    current_user = user_id_str
+    
+    while True:
+        if current_user not in activity_data:
+            break
+        referred_by = activity_data[current_user].get('referred_by')
+        if not referred_by:
+            break
+        chain.append(referred_by)
+        current_user = referred_by
+    
+    return chain
+
+async def referral_stats(update: Update, context: CallbackContext) -> None:
+    """Show referral statistics (admin only)"""
+    if not is_admin(update):
+        await update.message.reply_text("Зөвхөн админ.")
+        return
+    
+    activity_data = load_user_activity()
+    total_referrals = 0
+    total_credits = 0
+    top_referrers = []
+    
+    for user_id, data in activity_data.items():
+        referrals = len(data.get('referrals', []))
+        credits = data.get('referral_credits_earned', 0)
+        total_referrals += referrals
+        total_credits += credits
+        
+        if referrals > 0:
+            top_referrers.append({
+                'user_id': user_id,
+                'username': data.get('username'),
+                'first_name': data.get('first_name'),
+                'referrals': referrals,
+                'credits': credits
+            })
+    
+    message = [
+        "📊 Referral Statistics:",
+        f"Total users: {len(activity_data)}",
+        f"Total referrals: {total_referrals}",
+        f"Total credits distributed: {total_credits}",
+        "\n🏆 Top Referrers:"
+    ]
+    
+    # Sort by most referrals
+    top_referrers.sort(key=lambda x: x['referrals'], reverse=True)
+    
+    for i, referrer in enumerate(top_referrers[:10], 1):
+        message.append(
+            f"{i}. {referrer['first_name']} (@{referrer['username']}) - "
+            f"{referrer['referrals']} referrals, {referrer['credits']} credits"
+        )
+    
+    await update.message.reply_text('\n'.join(message))
+
+async def process_referral_credits(user_id, context: CallbackContext):
+    """Calculate and distribute referral credits when a user watches 5 movies"""
+    activity_data = load_user_activity()
+    user_id_str = str(user_id)
+    
+    if user_id_str not in activity_data:
+        return
+    
+    user_data = activity_data[user_id_str]
+    
+    # Only process when user reaches 5 movies watched
+    if user_data.get('movies_watched', 0) % 5 != 0:
+        return
+    
+    referral_chain = get_referral_chain(user_id)
+    
+    # Distribute credits based on position in referral chain
+    for position, referrer_id in enumerate(referral_chain):
+        if referrer_id not in activity_data:
+            continue
+            
+        # Calculate credit amount based on position
+        if position == 0:  # Direct referrer gets 1000
+            credit_amount = 1000
+        else:  # Higher levels get 500
+            credit_amount = 500
+            
+        # Update referrer's credits
+        activity_data[referrer_id]['referral_credits_earned'] = activity_data[referrer_id].get('referral_credits_earned', 0) + credit_amount
+        add_user_balance(int(referrer_id), credit_amount)
+        
+        # Notify referrer
+        try:
+            await context.bot.send_message(
+                chat_id=int(referrer_id),
+                text=f"🎉 Та {credit_amount} төгрөг бонус хүлээн авлаа! {user_data.get('first_name')} таны уриалсан хэрэглэгч 5 кино үзсэн."
+            )
+        except Exception as e:
+            logger.error(f"Could not notify referrer {referrer_id}: {e}")
+    
+    # Give 1000 to the new user themselves
+    activity_data[user_id_str]['referral_credits_earned'] = activity_data[user_id_str].get('referral_credits_earned', 0) + 1000
+    add_user_balance(int(user_id_str), 1000)
+    
+    save_user_activity(activity_data)
+
+async def referral(update: Update, context: CallbackContext) -> None:
+    """Handle /referral command to show user's referral link and stats"""
+    user = update.effective_user
+    activity_data = load_user_activity()
+    user_id_str = str(user.id)
+    
+    if user_id_str not in activity_data:
+        update_user_activity(user.id, {
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name
+        })
+    
+    user_data = activity_data.get(user_id_str, {})
+    
+    # Create the invite link
+    bot_username = context.bot.username
+    invite_link = f"https://t.me/{bot_username}?start={user.id}"
+    
+    message = [
+        f"👋 Сайн байна уу, {user.first_name}!",
+        "",
+        "🔗 Таны урилгын холбоос:",
+        f"{invite_link}",
+        "",
+        f"💰 Таны олсон бонус: {user_data.get('referral_credits_earned', 0)} төгрөг",
+        f"👥 Таны урисан хэрэглэгчид: {len(user_data.get('referrals', []))}",
+        "",
+        "💵 Бонус авах нөхцөл:",
+        "- Уригдсан хэрэглэгч 5 кино үзэх бүрт та 1000₮",
+        "- Тэдний уригдсан хэрэглэгч 5 кино үзэх бүрт та 500₮",
+        "- Уригдсан хүн бүр эхний 5 кино үзэхэд 1000₮ өөрсдөө авна",
+        "",
+        "📌 Дээрх холбоосоор найзуудаа урина уу!"
+    ]
+    
+    # Create a button to easily share the link
+    keyboard = [
+        [InlineKeyboardButton("📤 Холбоос хуваалцах", url=f"tg://msg_url?url={invite_link}&text=Join%20this%20cool%20movie%20bot!")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text('\n'.join(message), reply_markup=reply_markup)
 
 async def subscription_history(update: Update, context: CallbackContext) -> None:
     """View subscription history for a user (admin only)"""
@@ -1063,6 +1250,24 @@ async def send_video_with_limit_check(update: Update, context: CallbackContext, 
             user.last_name,
             video_name
         )
+
+        # Update user's movie count
+        activity_data = load_user_activity()
+        user_id_str = str(user.id)
+
+        if user_id_str not in activity_data:
+            update_user_activity(user.id, {
+                'username': user.username,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'movies_watched': 1
+            })
+        else:
+            current_count = activity_data[user_id_str].get('movies_watched', 0)
+            update_user_activity(user.id, {'movies_watched': current_count + 1})
+
+        # Process referral credits if they've reached a multiple of 5
+        await process_referral_credits(user.id, context)  # Fixed this line
         
         return True
     except Exception as e:
@@ -1172,6 +1377,37 @@ async def start(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
     video_name = None 
     
+    # Check for referral code in arguments (now just the user ID)
+    if context.args and context.args[0].isdigit():
+        referrer_id = context.args[0]
+        
+        # Only process if this is a new user (not already referred)
+        activity_data = load_user_activity()
+        user_id_str = str(user.id)
+        
+        if user_id_str not in activity_data or not activity_data[user_id_str].get('referred_by'):
+            # Validate referrer exists
+            if referrer_id in activity_data and referrer_id != user_id_str:
+                # Update new user's referred_by
+                update_user_activity(user.id, {
+                    'username': user.username,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'referred_by': referrer_id
+                })
+                
+                # Add to referrer's referrals list
+                referrer_data = activity_data.get(referrer_id, {})
+                referrals = referrer_data.get('referrals', [])
+                if user_id_str not in referrals:
+                    referrals.append(user_id_str)
+                    update_user_activity(int(referrer_id), {'referrals': referrals})
+                
+                await update.message.reply_text(
+                    f"🎉 Та {activity_data[referrer_id].get('first_name')}-гийн урилгаар бүртгүүллээ! "
+                    "5 кино үзэх бүрт хоёулаа бонус авах болно."
+                )
+
     if context.args and context.args[0].startswith('video_'):
         video_name = context.args[0][6:]
         if video_name in video_db:
@@ -1867,12 +2103,14 @@ def main() -> None:
     application.add_handler(CommandHandler("subscriptions", view_subscriptions))
     application.add_handler(CommandHandler("subhistory", subscription_history))
     application.add_handler(CommandHandler("aldaa", aldaa))
+    application.add_handler(CommandHandler("referral", referral))
+    application.add_handler(CommandHandler("referralstats", referral_stats))
 
     # Other handlers
     application.add_handler(CallbackQueryHandler(button))
     application.add_handler(MessageHandler(filters.VIDEO, handle_video))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    application.add_handler(MessageHandler(filters.PHOTO & ~filters.COMMAND, handle_screenshot))
+    application.add_handler(MessageHandler(filters.PHOTO & filters.CaptionRegex("payment|төлбөр"), handle_screenshot))
     application.add_handler(MessageHandler(filters.PHOTO & ~filters.COMMAND, handle_photo))
 
     application.add_error_handler(error_handler)
