@@ -57,7 +57,7 @@ SUBSCRIPTION_PRICES = {
     }
 }
 
-CATEGORIES = ['movielex', 'animelex', 'bl', 'gl', 'seriallex']
+CATEGORIES = ['movielex', 'animelex', 'seriallex', 'lgbtlex']
 
 # Dictionary to store video IDs and names
 video_db = {}
@@ -376,8 +376,12 @@ def activate_subscription(user_id, category, duration, bypass_balance_check=Fals
         
     if category == 'all':
         price = SUBSCRIPTION_PRICES[duration]['all']
+    elif category == 'lgbtlex':
+        # Price for LGBTlex subscription (same as 'all' in current implementation)
+        price = SUBSCRIPTION_PRICES[duration]['all']
     else:
         price = SUBSCRIPTION_PRICES[duration]['single']
+
     
     # Get user balance (initialize if doesn't exist)
     user_balance = balances.setdefault(user_id_str, {'balance': 5000}).get('balance', 5000)
@@ -744,8 +748,8 @@ async def set_subscription(update: Update, context: CallbackContext) -> None:
     if len(context.args) < 3:
         await update.message.reply_text(
             "Usage: /subset <user_id> <months> <category>\n\n"
-            "Example: /subset 12345678 1 gl\n\n"
-            "Categories: movielex, animelex, bl, gl, seriallex, all\n"
+            "Example: /subset 12345678 1 lgbtlex\n\n"
+            "Categories: movielex, animelex, seriallex, lgbtlex, all\n"
             "Months: 1, 3, or 6"
         )
         return
@@ -1146,28 +1150,31 @@ async def send_video_with_limit_check(update: Update, context: CallbackContext, 
     subscription = get_user_subscription(user.id)
     if subscription:
         now = datetime.now()
-        end_date = datetime.fromisoformat(subscription['end_date'])  # Changed from 'expires' to 'end_date'
+        end_date = datetime.fromisoformat(subscription['end_date'])
         video_category = video_data[video_name].get('category', 'other')
-        
-        if now < end_date and (subscription['category'] == 'all' or 
-                            subscription['category'] == video_category):
-            # Subscription covers this video
-            try:
-                await context.bot.send_video(
-                    chat_id=update.effective_chat.id,
-                    video=video_db[video_name],
-                    protect_content=True,
-                    caption=f"Таны үзэхгийг хүссэн кино энэ байна. (Subscription active)"
-                )
-                log_sent_video(user.id, video_name)
-                return True
-            except Exception as e:
-                logger.error(f"Error sending video: {e}")
-                await context.bot.send_message(
-                    chat_id=update.effective_chat.id,
-                    text="Кино илгээхэд алдаа гарлаа."
-                )
-                return False
+
+        if now < end_date:
+            # Check if subscription covers this video
+            if (subscription['category'] == 'all' or 
+                subscription['category'] == video_category or
+                (subscription['category'] == 'lgbtlex' and video_category in ['bl', 'gl'])):
+                # Subscription covers this video
+                try:
+                    await context.bot.send_video(
+                        chat_id=update.effective_chat.id,
+                        video=video_db[video_name],
+                        protect_content=True,
+                        caption=f"Таны үзэхгийг хүссэн кино энэ байна. (Subscription active)"
+                    )
+                    log_sent_video(user.id, video_name)
+                    return True
+                except Exception as e:
+                    logger.error(f"Error sending video: {e}")
+                    await context.bot.send_message(
+                        chat_id=update.effective_chat.id,
+                        text="Кино илгээхэд алдаа гарлаа."
+                    )
+                    return False
 
     video_price = video_data[video_name].get('price', 0)
     
