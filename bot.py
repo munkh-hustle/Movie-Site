@@ -1100,8 +1100,8 @@ async def handle_screenshot(update: Update, context: CallbackContext) -> None:
         await update.message.reply_text(
             "Дэлгэцний зураг хүлээг авлаа!\n"
             "Админ шалгах хүртэл түр хүлээнэ үү.\n"
-            f"Таны дугаар: {user.id}\n\n"
-            f"Баланс нэмэгдсэний дараа {LINK} хаягаар кино үзэх боломжтой болно."
+            "Шалгасны дараа таньд мэдэгдэл очих болно.\n"
+            f"Баланс нэмэгдсэний дараа {LINK} хаягаар кино сонгож үзэх боломжтой болно."
         )
                 
         # Forward to admin with instructions
