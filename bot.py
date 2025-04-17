@@ -605,6 +605,15 @@ async def process_referral_credits(user_id, context: CallbackContext):
     # Give 1000 to the new user themselves
     activity_data[user_id_str]['referral_credits_earned'] = activity_data[user_id_str].get('referral_credits_earned', 0) + 1000
     add_user_balance(int(user_id_str), 1000)
+
+    # Notify the new user about their bonus
+    try:
+        await context.bot.send_message(
+            chat_id=int(user_id_str),
+            text=f"🎉 Та 1000 төгрөг бонус хүлээн авлаа! Та 5 кино үзсэн."
+        )
+    except Exception as e:
+        logger.error(f"Could not notify new user {user_id_str}: {e}")
     
     save_user_activity(activity_data)
 
