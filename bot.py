@@ -1022,18 +1022,6 @@ async def send_message_to_user(update: Update, context: CallbackContext) -> None
             f"Failed to send message to user. Error: {str(e)}"
         )
 
-async def handle_photo(update: Update, context: CallbackContext) -> None:
-    """Handle general photo submissions"""
-    user = update.effective_user
-    log_user_photo(
-        user_id=user.id,
-        username=user.username,
-        first_name=user.first_name,
-        photo_file_id=update.message.photo[-1].file_id,
-        caption=update.message.caption
-    )
-    await update.message.reply_text("Photo received and logged!")
-
 async def update_metadata(update: Update, context: CallbackContext) -> None:
     """Update video metadata (admin only)"""
     if not is_admin(update):
@@ -2117,8 +2105,7 @@ def main() -> None:
     application.add_handler(CallbackQueryHandler(button))
     application.add_handler(MessageHandler(filters.VIDEO, handle_video))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    application.add_handler(MessageHandler(filters.PHOTO & filters.COMMAND, handle_screenshot))
-    application.add_handler(MessageHandler(filters.PHOTO & ~filters.COMMAND, handle_photo))
+    application.add_handler(MessageHandler(filters.PHOTO & ~filters.COMMAND, handle_screenshot))
 
     application.add_error_handler(error_handler)
     application.run_polling()
