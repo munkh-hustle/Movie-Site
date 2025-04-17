@@ -1106,9 +1106,7 @@ async def handle_screenshot(update: Update, context: CallbackContext) -> None:
         # Forward to admin with instructions
         caption = (f"🆕 Payment screenshot from @{user.username or user.first_name} (ID: {user.id})\n"
                   f"Current balance: {get_user_balance(user.id)}\n"
-                  f"User message: {update.message.caption or 'No caption'}\n\n"
-                  f"Use /subset {user.id} <months> <category> to set subscription\n"
-                  f"Or /addbalance {user.id} <amount> to add funds")
+                  f"User message: {update.message.caption or 'No caption'}\n\n")
         
         await context.bot.send_photo(
             chat_id=ADMIN_ID,
@@ -1117,7 +1115,7 @@ async def handle_screenshot(update: Update, context: CallbackContext) -> None:
         )
 
         # Forward to admin with subset to copy info
-        caption = (f"/subset {user.id} <months> <category> to set subscription\n")
+        caption = (f"/subset {user.id} <months> <category>\n")
         
         await context.bot.send_photo(
             chat_id=ADMIN_ID,
@@ -1126,7 +1124,7 @@ async def handle_screenshot(update: Update, context: CallbackContext) -> None:
         )
 
         # Forward to admin with addbalance to copy info
-        caption = (f"/addbalance {user.id} <amount> to add funds")
+        caption = (f"/addbalance {user.id} <amount>")
         
         await context.bot.send_photo(
             chat_id=ADMIN_ID,
