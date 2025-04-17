@@ -7,101 +7,6 @@
         "timestamp": "2025-04-09T15:16:32.029867",
         "video_name": "sakamoto-days-1-11",
         "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-09T15:16:32.036365",
-        "video_name": "sakamoto-days-1-11",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-09T16:04:11.391896",
-        "video_name": "sakamoto-days-1-11",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-09T16:04:23.774494",
-        "video_name": "sakamoto-days-1-10",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-09T16:04:23.783495",
-        "video_name": "sakamoto-days-1-10",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-09T16:04:29.833158",
-        "video_name": "sakamoto-days-1-10",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-09T16:07:58.791813",
-        "video_name": "sakamoto-days-1-9",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-09T16:07:58.814540",
-        "video_name": "sakamoto-days-1-9",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-09T16:08:27.237393",
-        "video_name": "sakamoto-days-1-8",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-09T16:08:27.259822",
-        "video_name": "sakamoto-days-1-8",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-09T16:08:28.621009",
-        "video_name": "sakamoto-days-1-8",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-09T16:08:41.673384",
-        "video_name": "sakamoto-days-1-7",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-09T16:08:41.683950",
-        "video_name": "sakamoto-days-1-7",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-09T16:11:19.731531",
-        "video_name": "bl-queer-as-folk-1-1",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-09T16:11:19.759249",
-        "video_name": "bl-queer-as-folk-1-1",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-09T23:13:09.101272",
-        "video_name": "sakamoto-days-1-11",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-09T23:13:20.566705",
-        "video_name": "sakamoto-days-1-10",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-10T08:40:21.721134",
-        "video_name": "sakamoto-days-1-11",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-10T09:03:34.273184",
-        "video_name": "pluto-1-4",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-17T12:41:56.518003",
-        "video_name": "the-apothecary-diaries-1-24",
-        "status": "sent"
       }
     ]
   },
@@ -111,11 +16,6 @@
     "deliveries": [
       {
         "timestamp": "2025-04-13T17:12:10.522526",
-        "video_name": "aldaa_troubleshooting_video",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-13T17:14:36.084987",
         "video_name": "aldaa_troubleshooting_video",
         "status": "sent"
       }
