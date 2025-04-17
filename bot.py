@@ -1187,7 +1187,7 @@ async def send_video_with_limit_check(update: Update, context: CallbackContext, 
                 chat_id=update.effective_chat.id,
                 video=video_db[video_name],
                 protect_content=True,
-                caption=f"Таны үзэхгийг хүссэн кино энэ байна. Таны Дансны үлдэгдэл: {get_user_balance(user.id)}"
+                caption=f"Таны үзэхгийг хүссэн кино энэ байна. Таны дансны үлдэгдэл: {get_user_balance(user.id)}"
             )
             log_sent_video(user.id, video_name)
             return True
@@ -1254,7 +1254,7 @@ async def send_video_with_limit_check(update: Update, context: CallbackContext, 
             chat_id=update.effective_chat.id,
             video=video_db[video_name],
             protect_content=True,
-            caption=f"Таны үзэхгийг хүссэн кино энэ байна. Үлдэгдэл: {get_user_balance(user.id)}"
+            caption=f"Таны үзэхгийг хүссэн кино энэ байна. Таны дансны үлдэгдэл: {get_user_balance(user.id)}"
         )
         log_sent_video(user.id, video_name)
         
