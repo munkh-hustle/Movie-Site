@@ -1,4 +1,14 @@
 {
-  "7942816218": 0,
-  "7905267896": 3000
+  "7942816218": {
+    "balance": 500,
+    "subscription": null
+  },
+  "7905267896": {
+    "balance": 3000,
+    "subscription": null
+  },
+  "7942162118": {
+    "balance": 5500,
+    "subscription": null
+  }
 }
