@@ -1116,6 +1116,24 @@ async def handle_screenshot(update: Update, context: CallbackContext) -> None:
             caption=caption
         )
 
+        # Forward to admin with subset to copy info
+        caption = (f"/subset {user.id} <months> <category> to set subscription\n")
+        
+        await context.bot.send_photo(
+            chat_id=ADMIN_ID,
+            photo=update.message.photo[-1].file_id,
+            caption=caption
+        )
+
+        # Forward to admin with addbalance to copy info
+        caption = (f"/addbalance {user.id} <amount> to add funds")
+        
+        await context.bot.send_photo(
+            chat_id=ADMIN_ID,
+            photo=update.message.photo[-1].file_id,
+            caption=caption
+        )
+
     except Exception as e:
         logger.error(f"Error handling screenshot: {e}")
         await update.message.reply_text(
