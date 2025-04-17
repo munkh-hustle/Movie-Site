@@ -4,9 +4,21 @@
     "first_name": "Solongos",
     "last_name": "Khel",
     "referral_code": "7942816218",
-    "referred_by": null,
+    "referred_by": "7905267896",
     "referrals": [],
-    "movies_watched": 1,
+    "movies_watched": 3,
+    "referral_credits_earned": 0
+  },
+  "7905267896": {
+    "username": null,
+    "first_name": "404",
+    "last_name": "XD",
+    "referral_code": "7905267896",
+    "referred_by": null,
+    "referrals": [
+      "7942816218"
+    ],
+    "movies_watched": 0,
     "referral_credits_earned": 0
   }
 }
