@@ -1232,6 +1232,7 @@ async def send_video_with_limit_check(update: Update, context: CallbackContext, 
                 "Кино ДАНГААР нь авбал доорх үнээр авна:\n"
                 "1 кино = 1500 төгрөг (Movielex)\n"
                 "1 кино = 1000 төгрөг (Seriallex)\n"
+                "1 кино = 1000 төгрөг (LGBTlex)\n"
                 "1 аниме = 500 төгрөг (Animelex)\n\n"
                 "Кино БАГЦААР нь авбал доорх үнээр авна:\n"
                 "1 сар = 10000 төгрөг (БҮГД)\n"
