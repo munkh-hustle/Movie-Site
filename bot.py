@@ -186,7 +186,6 @@ def record_user_activity(user_id, username, first_name, last_name, video_name):
         }
     
     # Log the video delivery
-    log_sent_video(user_id, video_name)
     save_user_activity(activity_data)
 
 def load_video_data():
@@ -584,10 +583,10 @@ async def process_referral_credits(user_id, context: CallbackContext):
             continue
             
         # Calculate credit amount based on position
-        if position == 0:  # Direct referrer gets 1000
-            credit_amount = 1000
-        else:  # Higher levels get 500
-            credit_amount = 500
+        if position == 0:  # Direct referrer gets 500
+            credit_amount = 300
+        else:  # Higher levels get 100
+            credit_amount = 100
             
         # Update referrer's credits
         activity_data[referrer_id]['referral_credits_earned'] = activity_data[referrer_id].get('referral_credits_earned', 0) + credit_amount
@@ -646,9 +645,9 @@ async def referral(update: Update, context: CallbackContext) -> None:
         f"👥 Таны урисан хэрэглэгчид: {len(user_data.get('referrals', []))}",
         "",
         "💵 Бонус авах нөхцөл:",
-        "- Уригдсан хэрэглэгч 5 кино үзэх бүрт та 1000₮",
-        "- Тэдний уригдсан хэрэглэгч 5 кино үзэх бүрт та 500₮",
-        "- Уригдсан хүн бүр эхний 5 кино үзэхэд 1000₮ өөрсдөө авна",
+        "- Та өөрөө 5 кино үзэх бүрт 1000₮ авна",
+        "- Уригдсан хэрэглэгч 5 кино үзэх бүрт та 300₮",
+        "- Тэдний уригдсан хэрэглэгч 5 кино үзэх бүрт та 100₮",
         "",
         "📌 Дээрх холбоосоор найзуудаа урина уу!"
     ]
@@ -833,7 +832,7 @@ async def add_balance(update: Update, context: CallbackContext) -> None:
         try:
             await context.bot.send_message(
                 chat_id=user_id,
-                text=f"🎉 Таны баланс шинэчлэгдлээ! Шинэ үлдэгдэл: {get_user_balance(user_id)}\n\n"
+                text=f"🎉 Таны дансанд мөнгө нэмэгдлээ! Шинэ үлдэгдэл: {get_user_balance(user_id)}\n\n"
                      f"{LINK} хаягаар кино үзэх боломжтой."
             )
         except Exception as e:
@@ -1373,7 +1372,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
             try:
                 await context.bot.send_message(
                     chat_id=user_id,
-                    text=f"🎉 Таны баланс шинэчлэгдлээ! Шинэ үлдэгдэл: {get_user_balance(user_id)}\n\n"
+                    text=f"🎉 Таны дансанд мөнгө нэмэгдлээ! Шинэ үлдэгдэл: {get_user_balance(user_id)}\n\n"
                          f"{LINK} хаягаар кино үзэх боломжтой."
                 )
             except Exception as e:
