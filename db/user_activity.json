@@ -6,8 +6,8 @@
     "referral_code": "7942816218",
     "referred_by": "7905267896",
     "referrals": [],
-    "movies_watched": 10,
-    "referral_credits_earned": 2000
+    "movies_watched": 5,
+    "referral_credits_earned": 1000
   },
   "7905267896": {
     "username": null,
@@ -19,6 +19,6 @@
       "7942816218"
     ],
     "movies_watched": 0,
-    "referral_credits_earned": 2000
+    "referral_credits_earned": 300
   }
 }
