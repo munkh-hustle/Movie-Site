@@ -43,6 +43,17 @@
   "7905267896": {
     "username": "",
     "first_name": "",
-    "deliveries": []
+    "deliveries": [
+      {
+        "timestamp": "2025-04-18T16:11:53.230057",
+        "video_name": "aldaa_troubleshooting_video",
+        "status": "sent"
+      },
+      {
+        "timestamp": "2025-04-18T16:16:01.276332",
+        "video_name": "aldaa_troubleshooting_video",
+        "status": "sent"
+      }
+    ]
   }
 }

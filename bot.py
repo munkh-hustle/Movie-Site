@@ -2071,7 +2071,25 @@ async def aldaa(update: Update, context: CallbackContext) -> None:
     video_id = TROUBLESHOOT_VIDEO
     
     # Message text
-    message_text = "Кино гацах эсвэл алдаа гарсан үед ингэж засаарай"
+    message_text = ("Кино дундаасаа гарахаа болих гацах зэрэг асуудал гарвал\n\n"
+                    "1. Интернэт холболт, дата дууссан байх\n"
+                    "2. Телеграм сасhе дуусэн байх тохиолдол байдаг\n\n"
+                    
+                    "Telegram cache, data цвэрлэх:\n\n"
+                    
+                    "Telegram cache цэвэрлэх\n"
+                    "-telegram settings\n"
+                    "-data and storage\n"
+                    "- storage usage\n"
+                    "- clear cache\n\n"
+                    
+                    "Telegram data црвэрлэх\n"
+                    "-telegram settings\n"
+                    "-data and storage\n"
+                    "- data usage\n"
+                    "-reset statistilcs\n\n"
+
+                    "Энэ 2 үйлдлийг хийгээд гацах зэрэг асуудалгуй болно")
     
     try:
         await context.bot.send_video(
