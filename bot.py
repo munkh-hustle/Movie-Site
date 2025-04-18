@@ -39,7 +39,7 @@ BLOCKED_USERS_FILE = 'db/blocked_users.json'
 USER_BALANCES_FILE = 'db/user_balances.json'
 MOVIE_DETAILS = 'movie-details.json'
 LINK = 'https://munkh-hustle.github.io/Movie-Site/'
-TROUBLESHOOT_VIDEO = ""
+TROUBLESHOOT_VIDEO = "BAACAgUAAxkBAAIOCmgCB984s9Y8-KJXESZxWU9TH8SBAALQFQACeyIQVBv3qOkRa7XMNgQ"
 
 # Subscription prices
 SUBSCRIPTION_PRICES = {
