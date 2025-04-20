@@ -53,7 +53,7 @@ SUBSCRIPTION_PRICES = {
     },
     '6_months': {
         'single': 25000,
-        'all': 75000
+        'all': 55000
     }
 }
 
