@@ -40,5 +40,15 @@
     "referrals": [],
     "movies_watched": 1,
     "referral_credits_earned": 0
+  },
+  "5121206644": {
+    "username": "saraa_11",
+    "first_name": "Saraa",
+    "last_name": "Bymba",
+    "referral_code": "5121206644",
+    "referred_by": null,
+    "referrals": [],
+    "movies_watched": 1,
+    "referral_credits_earned": 0
   }
 }
