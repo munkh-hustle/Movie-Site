@@ -3,97 +3,12 @@
     "username": "",
     "first_name": "",
     "deliveries": [
-      {
-        "timestamp": "2025-04-17T17:18:30.457244",
-        "video_name": "the-apothecary-diaries-1-24",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-17T17:18:42.964265",
-        "video_name": "the-apothecary-diaries-1-23",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-17T17:18:52.674461",
-        "video_name": "the-apothecary-diaries-1-22",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-17T17:19:02.638231",
-        "video_name": "the-apothecary-diaries-1-21",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-17T17:19:16.654645",
-        "video_name": "the-apothecary-diaries-1-20",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-17T18:15:00.655922",
-        "video_name": "the-apothecary-diaries-1-24",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-17T19:11:20.030125",
-        "video_name": "the-apothecary-diaries-1-23",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-20T22:45:12.576857",
-        "video_name": "aldaa_troubleshooting_video",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-21T10:36:48.781486",
-        "video_name": "the-thing-about-harry-2020",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-21T10:36:59.531304",
-        "video_name": "aldaa_troubleshooting_video",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-21T10:37:42.713087",
-        "video_name": "aldaa_troubleshooting_video",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-21T10:38:30.448775",
-        "video_name": "aldaa_troubleshooting_video",
-        "status": "sent"
-      }
     ]
   },
   "7905267896": {
     "username": "",
     "first_name": "",
     "deliveries": [
-      {
-        "timestamp": "2025-04-18T16:11:53.230057",
-        "video_name": "aldaa_troubleshooting_video",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-18T16:16:01.276332",
-        "video_name": "aldaa_troubleshooting_video",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-21T10:34:54.701035",
-        "video_name": "aldaa_troubleshooting_video",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-21T10:35:50.395360",
-        "video_name": "aldaa_troubleshooting_video",
-        "status": "sent"
-      },
-      {
-        "timestamp": "2025-04-21T10:38:15.187247",
-        "video_name": "aldaa_troubleshooting_video",
-        "status": "sent"
-      }
     ]
   }
 }

@@ -39,7 +39,7 @@ VIDEO_LOG_FILE = 'db/video_logs.json'        # For video delivery logs
 BLOCKED_USERS_FILE = 'db/blocked_users.json'
 USER_BALANCES_FILE = 'db/user_balances.json'
 MOVIE_DETAILS = 'movie-details.json'
-LINK = 'https://www.memekino.com'
+LINK = 'Google ээс memekino.com '
 TROUBLESHOOT_VIDEO = "BAACAgUAAxkBAAIBYGgFrrE_duOgAZxidZtuEcMB3OnZAALQFQACeyIQVL478CRT6Y0CNgQ"
 
 # Subscription prices
