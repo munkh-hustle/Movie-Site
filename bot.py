@@ -3,6 +3,7 @@ import logging
 import json
 import io
 import asyncio
+import re 
 from telegram.error import RetryAfter
 from PIL import Image
 from datetime import datetime, timedelta
@@ -515,6 +516,63 @@ def get_referral_chain(user_id):
         current_user = referred_by
     
     return chain
+
+async def forward_to_admin(update: Update, context: CallbackContext, text: str = None):
+    """Forward user message to admin"""
+    user = update.effective_user
+    message = update.effective_message
+    
+    # Get the text from either the message or the provided text
+    message_text = text or (message.caption if message.caption else message.text)
+    
+    if not message_text:
+        return
+    
+    try:
+        # Forward the message to admin with user info
+        forwarded = await context.bot.send_message(
+            chat_id=ADMIN_ID,
+            text=f"✉️ Message from @{user.username or user.first_name} (ID: {user.id}):\n\n{message_text}",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("📩 Reply", callback_data=f"reply_{user.id}")]
+            ])
+        )
+        
+        # Store the forwarded message ID for reply handling
+        context.user_data[f"forwarded_{user.id}"] = forwarded.message_id
+        
+    except Exception as e:
+        logger.error(f"Error forwarding message to admin: {e}")
+
+async def handle_admin_reply(update: Update, context: CallbackContext) -> None:
+    """Handle admin replies to forwarded messages"""
+    if not is_admin(update):
+        return
+    
+    message = update.effective_message
+    
+    # Check if this is a reply to a forwarded message from the bot
+    if (message.reply_to_message and 
+        message.reply_to_message.from_user and 
+        message.reply_to_message.from_user.id == context.bot.id):
+        
+        # Try to find user ID in the message text
+        forwarded_text = message.reply_to_message.text or ""
+        match = re.search(r"\(ID: (\d+)\)", forwarded_text)
+        
+        if match:
+            user_id = int(match.group(1))
+            try:
+                # Send the reply to the user
+                await context.bot.send_message(
+                    chat_id=user_id,
+                    text=f"👤 Admin reply:\n\n{message.text}"
+                )
+                await update.message.reply_text("✅ Reply sent successfully!")
+            except Exception as e:
+                await update.message.reply_text(f"❌ Failed to send reply: {e}")
+        else:
+            await update.message.reply_text("Couldn't find user ID in the forwarded message.")
 
 async def referral_stats(update: Update, context: CallbackContext) -> None:
     """Show referral statistics (admin only)"""
@@ -1352,40 +1410,39 @@ async def unblock_command(update: Update, context: CallbackContext) -> None:
         await update.message.reply_text("Invalid user ID. Must be a number.")
 
 async def handle_message(update: Update, context: CallbackContext) -> None:
-    """Log all user messages"""
+    """Log all user messages and forward to admin"""
     user = update.effective_user
     message = update.effective_message
     
-    # Check if admin is setting a balance for a user
-    if is_admin(update) and 'awaiting_payment_approval' in context.user_data:
-        try:
-            amount = int(message.text)
-            user_id = context.user_data['awaiting_payment_approval']
+    # Skip if message is empty or from admin
+    if is_admin(update):
+        # Check if admin is replying to a forwarded message from the bot
+        if (message.reply_to_message and 
+            message.reply_to_message.from_user and 
+            message.reply_to_message.from_user.id == context.bot.id):
             
-            # Add balance
-            add_user_balance(user_id, amount)
+            # Try to find user ID in the message text
+            forwarded_text = message.reply_to_message.text or ""
+            match = re.search(r"\(ID: (\d+)\)", forwarded_text)
             
-            await update.message.reply_text(
-                f"✅ {amount} added to user {user_id}'s balance. New balance: {get_user_balance(user_id)}"
-            )
-            
-            # Notify user
-            try:
-                await context.bot.send_message(
-                    chat_id=user_id,
-                    text=f"🎉 Таны дансанд мөнгө нэмэгдлээ! Шинэ үлдэгдэл: {get_user_balance(user_id)}\n\n"
-                         f"{LINK} хаягаар кино үзэх боломжтой."
-                )
-            except Exception as e:
-                logger.error(f"Could not notify user {user_id}: {e}")
-            
-            # Clear the awaiting state
-            del context.user_data['awaiting_payment_approval']
+            if match:
+                user_id = int(match.group(1))
+                try:
+                    await context.bot.send_message(
+                        chat_id=user_id,
+                        text=f"👤 Admin reply:\n\n{message.text}"
+                    )
+                    await update.message.reply_text("✅ Reply sent successfully!")
+                except Exception as e:
+                    await update.message.reply_text(f"❌ Failed to send reply: {e}")
             return
-            
-        except ValueError:
-            await update.message.reply_text("Please enter a valid number for the amount.")
-            return
+        
+        # Rest of admin message handling...
+        return
+    
+    # Forward message to admin if it's from a user
+    if message.text or message.caption:
+        await forward_to_admin(update, context)
     
     # Existing message logging functionality
     if message.text and not message.text.startswith('/'):
@@ -1846,6 +1903,14 @@ async def button(update: Update, context: CallbackContext) -> None:
                         chat_id=ADMIN_ID,
                         text=f"User (ID: {user_id}) remains blocked."
                     )
+                    
+        elif query.data.startswith('reply_'):
+            user_id = int(query.data[6:])
+            context.user_data['awaiting_reply'] = user_id
+            await query.edit_message_text(
+                text=f"Replying to user {user_id}. Please type your reply message now."
+            )
+            
     except Exception as e:
         logger.error(f"Error handling button press: {e}")
         try:
@@ -2154,6 +2219,9 @@ def main() -> None:
     application.add_handler(MessageHandler(filters.VIDEO, handle_video))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_handler(MessageHandler(filters.PHOTO & ~filters.COMMAND, handle_screenshot))
+
+    # handler for admin replies
+    application.add_handler(MessageHandler(filters.TEXT & filters.REPLY & filters.Chat(ADMIN_ID),handle_admin_reply))
 
     application.add_error_handler(error_handler)
     application.run_polling()
