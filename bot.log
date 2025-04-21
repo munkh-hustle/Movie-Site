@@ -376,3 +376,9 @@ Traceback (most recent call last):
   File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/telegram/request/_httpxrequest.py", line 301, in do_request
     raise NetworkError(f"httpx.{err.__class__.__name__}: {err}") from err
 telegram.error.NetworkError: httpx.ReadError: 
+2025-04-21 11:23:07,511 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7707078302:AAE5n-XSFL37hx3Zn9pQZS6BEpX1wx_ASgA/getUpdates "HTTP/1.1 200 OK"
+2025-04-21 11:23:17,756 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7707078302:AAE5n-XSFL37hx3Zn9pQZS6BEpX1wx_ASgA/getUpdates "HTTP/1.1 200 OK"
+2025-04-21 11:23:28,022 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7707078302:AAE5n-XSFL37hx3Zn9pQZS6BEpX1wx_ASgA/getUpdates "HTTP/1.1 200 OK"
+2025-04-21 11:23:38,265 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7707078302:AAE5n-XSFL37hx3Zn9pQZS6BEpX1wx_ASgA/getUpdates "HTTP/1.1 200 OK"
+2025-04-21 11:23:48,542 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7707078302:AAE5n-XSFL37hx3Zn9pQZS6BEpX1wx_ASgA/getUpdates "HTTP/1.1 200 OK"
+2025-04-21 11:23:58,790 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7707078302:AAE5n-XSFL37hx3Zn9pQZS6BEpX1wx_ASgA/getUpdates "HTTP/1.1 200 OK"
