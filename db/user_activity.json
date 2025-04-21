@@ -30,5 +30,15 @@
     "referrals": [],
     "movies_watched": 1,
     "referral_credits_earned": 0
+  },
+  "7186838772": {
+    "username": null,
+    "first_name": "Saran",
+    "last_name": "gua",
+    "referral_code": "7186838772",
+    "referred_by": null,
+    "referrals": [],
+    "movies_watched": 1,
+    "referral_credits_earned": 0
   }
 }
