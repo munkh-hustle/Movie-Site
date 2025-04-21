@@ -2,13 +2,17 @@
   "7942816218": {
     "username": "",
     "first_name": "",
-    "deliveries": [
-    ]
+    "deliveries": []
   },
   "7905267896": {
     "username": "",
     "first_name": "",
     "deliveries": [
+      {
+        "timestamp": "2025-04-21T11:10:42.625057",
+        "video_name": "the-thing-about-harry-2020",
+        "status": "sent"
+      }
     ]
   }
 }
