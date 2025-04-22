@@ -2,7 +2,13 @@
   "7942816218": {
     "username": "",
     "first_name": "",
-    "deliveries": []
+    "deliveries": [
+      {
+        "timestamp": "2025-04-22T12:28:59.921394",
+        "video_name": "aldaa_troubleshooting_video",
+        "status": "sent"
+      }
+    ]
   },
   "7905267896": {
     "username": "",
