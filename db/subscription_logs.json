@@ -10,5 +10,17 @@
         "end_date": "2025-05-23T19:25:24.834298"
       }
     }
+  ],
+  "7942816218": [
+    {
+      "timestamp": "2025-04-23T19:37:21.427701",
+      "action": "activated",
+      "details": {
+        "category": "lgbtlex",
+        "duration": "1_month",
+        "price": 10000,
+        "end_date": "2025-05-23T19:37:21.425440"
+      }
+    }
   ]
 }
