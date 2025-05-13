@@ -5,7 +5,7 @@ let movieData = {};
 // Load movie data from JSON
 async function loadMovieData() {
     try {
-        const response = await fetch('../movie-details.json');
+        const response = await fetch('./movie-details.json');
         movieData = await response.json();
         return movieData;
     } catch (error) {

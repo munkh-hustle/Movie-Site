@@ -52,15 +52,25 @@
                 <p id="movie-release"></p>
             </div>
             
-            <a href="#" id="telegram-link" class="telegram-btn">
-                <i class="fab fa-telegram"></i>Telegram дээр ҮЗЭХ
-            </a>
+            <button id="watch-btn" class="watch-btn">
+                <i class="fas fa-play"></i> Watch
+            </button>
             
             <a href="#" id="trailer-link" class="trailer-btn">
-                <i class="fas fa-play"></i> Trailer ҮЗЭХ
+                <i class="fas fa-play"></i> Trailer
             </a>
         </div>
     </main>
+
+    <!-- Video Player Modal -->
+    <div id="video-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <div class="video-container">
+                <iframe id="video-player" width="800" height="600" allowfullscreen allowtransparency allow="autoplay" scrolling="no" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
 
     <footer class="site-footer">
         <div class="container">

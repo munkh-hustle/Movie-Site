@@ -27,11 +27,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         `<span>${genre}</span>`
     ).join('');
     
-    // Set Telegram link (still using title for the backend)
-    const telegramLink = document.getElementById('telegram-link');
-    telegramLink.href = `https://t.me/meme_kino_bot?start=video_${encodeURIComponent(movie.title)}`;
-
-    // Trailer
+    // Trailer link
     const trailerLink = document.getElementById('trailer-link');
     trailerLink.href = `https://t.me/meme_kino_bot?start=trailer_${encodeURIComponent(movie.title)}`;
+    
+    // Video player functionality
+    const watchBtn = document.getElementById('watch-btn');
+    const modal = document.getElementById('video-modal');
+    const closeBtn = document.querySelector('.close-btn');
+    const videoPlayer = document.getElementById('video-player');
+    
+    watchBtn.addEventListener('click', () => {
+        if (movie.video_source) {
+            videoPlayer.src = movie.video_source;
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        }
+    });
+    
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+        videoPlayer.src = ''; // Stop video when closing
+        document.body.style.overflow = 'auto'; // Enable scrolling
+    });
+    
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+            videoPlayer.src = ''; // Stop video when clicking outside
+            document.body.style.overflow = 'auto'; // Enable scrolling
+        }
+    });
 });
